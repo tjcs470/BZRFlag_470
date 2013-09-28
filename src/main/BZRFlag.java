@@ -1,13 +1,16 @@
 package main;
 
 import ServerResponse.BoolResponse;
+import ServerResponse.MyTank;
 import ServerResponse.ObstaclesQuery;
+import ServerResponse.Tank;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +65,15 @@ public class BZRFlag {
             System.out.println(serverResponse);
 
         return serverResponse;
+    }
+
+    /**
+     * Performs handshake with the server
+     */
+    public void handshake() throws IOException {
+        String reply = readOneReplyLine();
+        assert(reply.equals("bzrobots 1"));
+        sendLine("agent 1");
     }
 
     /**
@@ -178,6 +190,101 @@ public class BZRFlag {
         return obstaclesQuery;
     }
 
+    /**
+     * Queries the other tanks within the world
+     * @param args
+     * @throws IOException
+     */
+    public ArrayList<Tank> getOtherTanks() throws IOException
+    {
+        String queryCmd = "othertanks";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+
+        ArrayList<Tank> otherTanks = new ArrayList<Tank>();
+
+        Pattern obstacleLine = Pattern.compile(
+                "othertank (.*?[0-9]) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
+        );
+
+        Matcher matcher = null;
+        String arrayLine = readOneReplyLine();
+        assert(arrayLine.equals("begin"));
+        arrayLine = readOneReplyLine();
+        while(!arrayLine.equals("end")) {
+            matcher = obstacleLine.matcher(arrayLine);
+            assert(matcher.matches());
+
+            String callSign = matcher.group(1);
+            Tank.TeamColor teamColor = Tank.TeamColor.valueOf(matcher.group(2).toUpperCase());
+            Tank.TankStatus status = Tank.TankStatus.valueOf(matcher.group(3).toUpperCase());
+            Tank.TeamColor flagColor = matcher.group(4).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(4).toUpperCase());
+            double xPos = Double.parseDouble(matcher.group(5));
+            double yPos = Double.parseDouble(matcher.group(6));
+            Vector tankPos = new Vector(xPos, yPos);
+            double angle = Double.parseDouble(matcher.group(7));
+
+            Tank tank = new Tank(callSign, teamColor, status, flagColor, tankPos, angle);
+            otherTanks.add(tank);
+
+            arrayLine = readOneReplyLine();
+        }
+
+        return otherTanks;
+    }
+
+    public ArrayList<MyTank> getMyTanks(Tank.TeamColor myColor) throws IOException {
+        String queryCmd = "mytanks";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+
+        ArrayList<MyTank> myTanks = new ArrayList<MyTank>();
+
+        Pattern obstacleLine = Pattern.compile(
+                "mytank ([0-9])\\s+(.*?[0-9])\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+ (.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)"
+        );
+
+        Matcher matcher = null;
+        String arrayLine = readOneReplyLine();
+        assert(arrayLine.equals("begin"));
+        arrayLine = readOneReplyLine();
+        while(!arrayLine.equals("end")) {
+            matcher = obstacleLine.matcher(arrayLine);
+            assert(matcher.matches());
+
+            int index = Integer.parseInt(matcher.group(1));
+            String callSign = matcher.group(2);
+            Tank.TankStatus status = Tank.TankStatus.valueOf(matcher.group(3).toUpperCase());
+            int shotsAvail = Integer.parseInt(matcher.group(4));
+            double timeToReload = Double.parseDouble(matcher.group(5));
+            Tank.TeamColor flagColor = matcher.group(6).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(4).toUpperCase());
+            double xPos = Double.parseDouble(matcher.group(7));
+            double yPos = Double.parseDouble(matcher.group(8));
+            Vector tankPos = new Vector(xPos, yPos);
+            double angle = Double.parseDouble(matcher.group(9));
+            double xVel = Double.parseDouble(matcher.group(10));
+            double yVel = Double.parseDouble(matcher.group(11));
+            Vector vel = new Vector(xVel, yVel);
+            double angVel = Double.parseDouble(matcher.group(12));
+
+            MyTank tank = new MyTank(index,
+                    callSign,
+                    myColor,
+                    status, shotsAvail,
+                    timeToReload,
+                    flagColor,
+                    tankPos,
+                    angle,
+                    vel,
+                    angVel);
+            myTanks.add(tank);
+
+            arrayLine = readOneReplyLine();
+        }
+
+        return myTanks;
+    }
+
     public static void main(String args[]) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         /*System.out.print("Input host:");
@@ -188,7 +295,7 @@ public class BZRFlag {
         int portNum = Integer.parseInt(portNumStr);*/
 
         //BZRFlag agent = new BZRFlag("localhost", portNum);
-        BZRFlag agent = new BZRFlag("localhost", 52738);
+        /*BZRFlag agent = new BZRFlag("localhost", 38508);
         agent.sendLine("agent 1");
         agent.readOneReplyLine();
 
@@ -196,10 +303,13 @@ public class BZRFlag {
         agent.speed(1, -1.0);
         agent.angVel(1, 1.0);
         agent.getObstacles();
+        agent.getOtherTanks();
+        agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        /*Pattern p = Pattern.compile("ack ([0-9]+\\.[0-9]+) angvel 0 1.0");
-        Matcher m = p.matcher("ack 148.01157093 angvel 0 1.0");
-        boolean b = m.matches();
-        String thing = m.group(1);*/
+        BZRFlag blueServer = new BZRFlag("localhost", 38508);
+        DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
+        while(true) {
+            dumbAgent.tick();
+        }
     }
 }

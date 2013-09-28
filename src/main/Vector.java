@@ -29,6 +29,14 @@ public class Vector {
         return new Vector(xTotal, yTotal);
     }
 
+    /**
+     * Returns the magnitude of the vector
+     * @return
+     */
+    public double getMag() {
+        return Math.sqrt((mX * mX) + (mY * mY));
+    }
+
     public double mX;
     public double mY;
 }
