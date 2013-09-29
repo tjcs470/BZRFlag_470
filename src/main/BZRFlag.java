@@ -178,8 +178,10 @@ public class BZRFlag {
 
             Vector p0 = new Vector(Double.parseDouble(matcher.group(1)), Double.parseDouble(matcher.group(2)));
             Vector p1 = new Vector(Double.parseDouble(matcher.group(3)), Double.parseDouble(matcher.group(4)));
+            Vector p2 = new Vector(Double.parseDouble(matcher.group(5)), Double.parseDouble(matcher.group(6)));
+            Vector p3 = new Vector(Double.parseDouble(matcher.group(7)), Double.parseDouble(matcher.group(8)));
 
-            obstacles.add(new Obstacle(p0, p1));
+            obstacles.add(new Obstacle(p0, p1, p2, p3));
 
             arrayLine = readOneReplyLine();
         }
@@ -282,7 +284,29 @@ public class BZRFlag {
         return myTanks;
     }
 
+    public static void plotWorld() throws IOException {
+        BZRFlag agent = new BZRFlag("localhost", 33925);
+        agent.handshake();
+        ArrayList<Obstacle> obstacles = agent.getObstacles();
+
+        PrintWriter gpiFile = new PrintWriter("world.gpi", "UTF-8");
+        gpiFile.println("set xrange [-400.0: 400.0]");
+        gpiFile.println("set yrange [-400.0: 400.0]");
+        gpiFile.println("unset arrow");
+
+        for(Obstacle obstacle : obstacles) {
+            gpiFile.println(GnuplotPrinter.getObstaclePlotCmds(obstacle));
+        }
+
+        gpiFile.println("e");
+
+        gpiFile.close();
+    }
+
     public static void main(String args[]) throws IOException {
+        //plotWorld();
+
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         /*System.out.print("Input host:");
         String host = br.readLine();*/
