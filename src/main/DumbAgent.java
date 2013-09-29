@@ -113,6 +113,7 @@ public class DumbAgent {
     private double mPrevTime;
     /**A dumb guard tank*/
     private DumbTank dumbTank0;
+    private DumbTank dumbTank1;
     /**My team color*/
     private Tank.TeamColor mTeamColor;
 
@@ -128,6 +129,7 @@ public class DumbAgent {
 
         mPrevTime = System.currentTimeMillis();
         dumbTank0 = new DumbTank();
+        dumbTank1 = new DumbTank();
     }
 
     /**
@@ -136,15 +138,22 @@ public class DumbAgent {
     public void tick() throws IOException {
         ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
         double newTime = System.currentTimeMillis();
-        double timeDiff = (newTime - mPrevTime) / 1000;
+        double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
 
-        dumbTank0.update(timeDiff, myTanks.get(0).getAngle());
+        dumbTank0.update(timeDiffInSec, myTanks.get(0).getAngle());
 
         mServer.speed(0, dumbTank0.getVel());
         mServer.angVel(0, dumbTank0.getAngVel());
         if(dumbTank0.shouldShoot())
             mServer.shoot(0);
+
+        dumbTank1.update(timeDiffInSec, myTanks.get(1).getAngle());
+
+        mServer.speed(1, dumbTank1.getVel());
+        mServer.angVel(1, dumbTank1.getAngVel());
+        if(dumbTank1.shouldShoot())
+            mServer.shoot(1);
 
     }
 }

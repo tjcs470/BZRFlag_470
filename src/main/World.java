@@ -17,8 +17,8 @@ public class World {
     public World() {
         mGoal = new Goal(new Vector(0,0));
         mObstacles = new ArrayList<PotentialField>();
-        for(int i = 0; i < 5; i++) {
+        /*for(int i = 0; i < 5; i++) {
              mObstacles.add(new Obstacle(new Vector(0,0)));
-        }
+        }*/
     }
 }

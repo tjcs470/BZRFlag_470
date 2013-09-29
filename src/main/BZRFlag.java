@@ -1,9 +1,6 @@
 package main;
 
-import ServerResponse.BoolResponse;
-import ServerResponse.MyTank;
-import ServerResponse.ObstaclesQuery;
-import ServerResponse.Tank;
+import ServerResponse.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -161,12 +158,12 @@ public class BZRFlag {
      * @return
      * @throws IOException
      */
-    public ObstaclesQuery getObstacles() throws IOException {
+    public ArrayList<Obstacle> getObstacles() throws IOException {
         String queryCmd = "obstacles";
         sendLine(queryCmd);
         readAck(queryCmd);
 
-        ObstaclesQuery obstaclesQuery = new ObstaclesQuery();
+        ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
         Pattern obstacleLine = Pattern.compile(
                 "obstacle (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?)"
@@ -182,12 +179,12 @@ public class BZRFlag {
             Vector p0 = new Vector(Double.parseDouble(matcher.group(1)), Double.parseDouble(matcher.group(2)));
             Vector p1 = new Vector(Double.parseDouble(matcher.group(3)), Double.parseDouble(matcher.group(4)));
 
-            obstaclesQuery.addObstacle(new ObstaclesQuery.Obstacle(p0, p1));
+            obstacles.add(new Obstacle(p0, p1));
 
             arrayLine = readOneReplyLine();
         }
 
-        return obstaclesQuery;
+        return obstacles;
     }
 
     /**
@@ -295,7 +292,7 @@ public class BZRFlag {
         int portNum = Integer.parseInt(portNumStr);*/
 
         //BZRFlag agent = new BZRFlag("localhost", portNum);
-        /*BZRFlag agent = new BZRFlag("localhost", 38508);
+        /*BZRFlag agent = new BZRFlag("localhost", 50271);
         agent.sendLine("agent 1");
         agent.readOneReplyLine();
 
@@ -306,7 +303,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 38508);
+        BZRFlag blueServer = new BZRFlag("localhost", 50271);
         DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
             dumbAgent.tick();
