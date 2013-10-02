@@ -127,7 +127,7 @@ public class BZRFlag {
     public BoolResponse speed(int botId, double speed) throws IOException {
         StringBuilder cmdBuilder = new StringBuilder("speed ");
         cmdBuilder.append(Integer.toString(botId));
-        cmdBuilder.append(" " + Double.toString(speed));
+        cmdBuilder.append(" ").append(Double.toString(speed));
         String speedCmd = cmdBuilder.toString();
         sendLine(speedCmd);
         readAck(speedCmd);

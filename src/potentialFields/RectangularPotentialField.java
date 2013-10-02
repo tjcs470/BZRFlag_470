@@ -28,12 +28,12 @@ public abstract class RectangularPotentialField extends PotentialField {
 
     @Override
     protected double getDistanceToPotentialField(Point2D location) {
-        return polygon.getDistance(location);
+        return polygon.distance(location);
     }
 
     @Override
     protected double getAngleToPotentialField(Point2D location) {
-        Point2D center = polygon.getCentroid();
+        Point2D center = polygon.centroid();
         return Math.atan2(center.getY() - location.getY(), center.getX() - location.getX());
     }
 

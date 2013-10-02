@@ -7,7 +7,6 @@ import main.Vector;
  * User: ty
  * Date: 9/28/13
  * Time: 9:51 PM
- * To change this template use File | Settings | File Templates.
  */
 public class Obstacle {
     /**Corners of obstacle*/

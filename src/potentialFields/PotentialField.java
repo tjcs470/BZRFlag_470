@@ -1,6 +1,5 @@
 package potentialFields;
 
-
 import main.Vector;
 import math.geom2d.Point2D;
 
@@ -20,4 +19,3 @@ public abstract class PotentialField {
         return new Vector(0.0, 0.0);
     }
 }
-
