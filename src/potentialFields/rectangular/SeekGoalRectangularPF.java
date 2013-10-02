@@ -9,7 +9,6 @@ import potentialFields.RectangularPotentialField;
  * User: larsojor
  * Date: 10/1/13
  * Time: 10:44 PM
- * To change this template use File | Settings | File Templates.
  */
 public class SeekGoalRectangularPF extends RectangularPotentialField {
 
