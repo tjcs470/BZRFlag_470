@@ -17,7 +17,7 @@ public class AvoidObstacleTangentialCircularPF extends AvoidObstacleCircularPF {
         this.clockwise = clockwise;
     }
 
-    protected double getAngleToPotentialField(Point2D location) {
+    public double getAngleToPotentialField(Point2D location) {
         double angle = super.getAngleToPotentialField(location);
         return clockwise ? angle - 90 : angle + 90;
     }

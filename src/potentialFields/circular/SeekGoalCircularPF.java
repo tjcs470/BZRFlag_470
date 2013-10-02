@@ -19,7 +19,7 @@ public class SeekGoalCircularPF extends CircularPotentialField {
     }
 
     @Override
-    protected Vector getVectorForce(Point2D location) {
+    public Vector getVectorForce(Point2D location) {
         if(isPointOnPotentialField(location)) return emptyVector();
 
         double distance = getDistanceToPotentialField(location);

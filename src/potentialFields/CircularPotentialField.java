@@ -21,18 +21,18 @@ public abstract class CircularPotentialField extends PotentialField {
     }
 
     @Override
-    protected double getDistanceToPotentialField(Point2D location) {
-        return Point2D.getDistance(center, location);
+    public double getDistanceToPotentialField(Point2D location) {
+        return Point2D.distance(center, location);
     }
 
     @Override
-    protected boolean isPointOnPotentialField(Point2D location) {
+    public boolean isPointOnPotentialField(Point2D location) {
         return getDistanceToPotentialField(location) < radius;
     }
 
     @Override
-    protected double getAngleToPotentialField(Point2D location) {
-        return Math.atan2(center.getY() - location.getY(), center.getX() - location.getX());
+    public double getAngleToPotentialField(Point2D location) {
+        return Math.atan2(center.y() - location.y(), center.x() - location.x());
     }
 
 }

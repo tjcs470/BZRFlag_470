@@ -24,7 +24,7 @@ public class AvoidObstacleCircularPF extends CircularPotentialField {
     }
 
     @Override
-    protected Vector getVectorForce(Point2D location) {
+    public Vector getVectorForce(Point2D location) {
 
         double angle = getAngleToPotentialField(location);
         if(isPointOnPotentialField(location)) {

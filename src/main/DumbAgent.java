@@ -5,7 +5,6 @@ import ServerResponse.Tank;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Random;
 
 /**
@@ -13,7 +12,6 @@ import java.util.Random;
  * User: ty
  * Date: 9/27/13
  * Time: 8:37 PM
- * To change this template use File | Settings | File Templates.
  */
 public class DumbAgent {
     /**

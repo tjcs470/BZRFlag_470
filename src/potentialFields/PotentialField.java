@@ -15,16 +15,17 @@ import java.util.List;
  */
 public abstract class PotentialField {
 
-    protected abstract Vector getVectorForce(Point2D location);
-    protected abstract boolean isPointOnPotentialField(Point2D location);
-    protected abstract double getDistanceToPotentialField(Point2D location);
-    protected abstract double getAngleToPotentialField(Point2D location);
+    public abstract Vector getVectorForce(Point2D location);
+    public abstract boolean isPointOnPotentialField(Point2D location);
+    public abstract double getDistanceToPotentialField(Point2D location);
+    public abstract double getAngleToPotentialField(Point2D location);
 
-    public Vector emptyVector() {
+    public static Vector emptyVector() {
         return new Vector(0.0, 0.0);
     }
 
     public static Vector sumPotentialFields(final Point2D location, PotentialField... fields) {
+        assert location != null;
         List<Vector> vectors = new ArrayList<Vector>();
         for(PotentialField field : fields) {
             if(field == null) continue;
