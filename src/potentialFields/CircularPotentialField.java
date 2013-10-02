@@ -1,4 +1,4 @@
-package potentialFields.circular;
+package potentialFields;
 
 
 import math.geom2d.Point2D;

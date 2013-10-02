@@ -1,8 +1,8 @@
-package potentialFields.rectangular;
+package potentialFields.circular;
 
 import main.Vector;
 import math.geom2d.Point2D;
-import potentialFields.RectangularPotentialField;
+import potentialFields.CircularPotentialField;
 
 import java.util.List;
 
@@ -10,21 +10,16 @@ import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
  * Created with IntelliJ IDEA.
- * User: larsojor
- * Date: 10/1/13
- * To change this template use File | Settings | File Templates.
+ * User: Jordan
+ * Date: 10/2/13
+ * Time: 10:05 AM
  */
-public class AvoidObstacleRectangularPF extends RectangularPotentialField {
+public class AvoidObstacleCircularPF extends CircularPotentialField {
 
     private double sDistance;
 
-    public AvoidObstacleRectangularPF(double sDistance, Point2D... points) {
-        super(points);
-        this.sDistance = sDistance;
-    }
-
-    public AvoidObstacleRectangularPF(List<Point2D> points, double sDistance) {
-        super(points);
+    public AvoidObstacleCircularPF(double radius, Point2D center, double sDistance) {
+        super(radius, center);
         this.sDistance = sDistance;
     }
 
