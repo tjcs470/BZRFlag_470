@@ -1,7 +1,8 @@
-package potentialFields;
+package potentialFields.random;
 
 import main.Vector;
 import math.geom2d.Point2D;
+import potentialFields.PotentialField;
 
 import java.util.Random;
 
@@ -10,9 +11,8 @@ import java.util.Random;
  * User: Jordan
  * Date: 10/2/13
  * Time: 10:00 AM
- * To change this template use File | Settings | File Templates.
  */
-public class RandomPotentialField extends PotentialField{
+public class RandomPotentialField extends PotentialField {
 
     private double maxX;
     private double maxY;
@@ -35,12 +35,14 @@ public class RandomPotentialField extends PotentialField{
     }
 
     @Override
-    protected double getDistanceToPotentialField(Point2D location) {
+    public double getDistanceToPotentialField(Point2D location) {
         return 0;
     }
 
     @Override
-    protected double getAngleToPotentialField(Point2D location) {
-        return 0;
+    public double getAngleToPotentialField(Point2D location) {
+        return gen.nextDouble() * 2 * Math.PI; //TODO - degrees or radians?
+        //return gen.nextDouble() * 360;
+
     }
 }
