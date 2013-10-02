@@ -1,7 +1,12 @@
 package potentialFields;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import main.Vector;
 import math.geom2d.Point2D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,5 +22,26 @@ public abstract class PotentialField {
 
     public Vector emptyVector() {
         return new Vector(0.0, 0.0);
+    }
+
+    public static Vector sumPotentialFields(final Point2D location, PotentialField... fields) {
+        List<Vector> vectors = new ArrayList<Vector>();
+        for(PotentialField field : fields) {
+            if(field == null) continue;
+            vectors.add(field.getVectorForce(location));
+        }
+        return sumVectors(vectors);
+    }
+
+    public static Vector sumVectors(List<Vector> vectors) {
+        double x = 0;
+        double y = 0;
+
+        for(Vector v : vectors) {
+            x += v.x();
+            y += v.y();
+        }
+
+        return new Vector(x,y);
     }
 }
