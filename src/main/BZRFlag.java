@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Double.*;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,8 +42,6 @@ public class BZRFlag {
 
     /**
      * Sends a message to the BZRflag game server
-     * @param msgToServer
-     * @return
      */
     private void sendLine(String msgToServer)
     {
@@ -53,7 +53,6 @@ public class BZRFlag {
 
     /**
      * Reads reply from the BZRflag game
-     * @return
      */
     private String readOneReplyLine() throws IOException {
         String serverResponse = mIn.readLine();
@@ -69,6 +68,7 @@ public class BZRFlag {
      */
     public void handshake() throws IOException {
         String reply = readOneReplyLine();
+        assert reply != null;
         assert(reply.equals("bzrobots 1"));
         sendLine("agent 1");
     }
@@ -85,7 +85,7 @@ public class BZRFlag {
         Matcher matcher = ackRegex.matcher(ackLine);
 
         assert(matcher.matches());
-        double timeStamp = Double.parseDouble(matcher.group(1));
+        parseDouble(matcher.group(1));
 
         return true;
     }
@@ -99,11 +99,10 @@ public class BZRFlag {
         Matcher matcher = boolRegex.matcher(boolLine);
 
         assert(matcher.matches());
-        boolean success = matcher.group(1).equals("ok") ? true : false;
+        boolean success = matcher.group(1).equals("ok");
         String descrip = matcher.group(2) != null ? matcher.group(2) : "";
 
-        BoolResponse boolResponse = new BoolResponse(success, descrip);
-        return boolResponse;
+        return new BoolResponse(success, descrip);
     }
 
     /**
@@ -123,7 +122,6 @@ public class BZRFlag {
 
     /**
      * Sends the the speed command
-     * @param args
      * @throws IOException
      */
     public BoolResponse speed(int botId, double speed) throws IOException {
@@ -144,12 +142,9 @@ public class BZRFlag {
      * @throws IOException
      */
     public BoolResponse angVel(int botId, double angVel) throws IOException {
-        StringBuilder cmdBuilder = new StringBuilder("angvel ");
-        cmdBuilder.append(Integer.toString(botId));
-        cmdBuilder.append(" " + Double.toString(angVel));
-        String angVelCmd = cmdBuilder.toString();
-        sendLine(angVelCmd);
-        readAck(angVelCmd);
+        String command = String.format("angvel %d %s", botId, angVel);
+        sendLine(command);
+        readAck(command);
         return readBool();
     }
 
@@ -176,10 +171,10 @@ public class BZRFlag {
             matcher = obstacleLine.matcher(arrayLine);
             assert(matcher.matches());
 
-            Vector p0 = new Vector(Double.parseDouble(matcher.group(1)), Double.parseDouble(matcher.group(2)));
-            Vector p1 = new Vector(Double.parseDouble(matcher.group(3)), Double.parseDouble(matcher.group(4)));
-            Vector p2 = new Vector(Double.parseDouble(matcher.group(5)), Double.parseDouble(matcher.group(6)));
-            Vector p3 = new Vector(Double.parseDouble(matcher.group(7)), Double.parseDouble(matcher.group(8)));
+            Vector p0 = new Vector(parseDouble(matcher.group(1)), parseDouble(matcher.group(2)));
+            Vector p1 = new Vector(parseDouble(matcher.group(3)), parseDouble(matcher.group(4)));
+            Vector p2 = new Vector(parseDouble(matcher.group(5)), parseDouble(matcher.group(6)));
+            Vector p3 = new Vector(parseDouble(matcher.group(7)), parseDouble(matcher.group(8)));
 
             obstacles.add(new Obstacle(p0, p1, p2, p3));
 
@@ -191,7 +186,6 @@ public class BZRFlag {
 
     /**
      * Queries the other tanks within the world
-     * @param args
      * @throws IOException
      */
     public ArrayList<Tank> getOtherTanks() throws IOException
@@ -218,10 +212,10 @@ public class BZRFlag {
             Tank.TeamColor teamColor = Tank.TeamColor.valueOf(matcher.group(2).toUpperCase());
             Tank.TankStatus status = Tank.TankStatus.valueOf(matcher.group(3).toUpperCase());
             Tank.TeamColor flagColor = matcher.group(4).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(4).toUpperCase());
-            double xPos = Double.parseDouble(matcher.group(5));
-            double yPos = Double.parseDouble(matcher.group(6));
+            double xPos = parseDouble(matcher.group(5));
+            double yPos = parseDouble(matcher.group(6));
             Vector tankPos = new Vector(xPos, yPos);
-            double angle = Double.parseDouble(matcher.group(7));
+            double angle = parseDouble(matcher.group(7));
 
             Tank tank = new Tank(callSign, teamColor, status, flagColor, tankPos, angle);
             otherTanks.add(tank);
@@ -255,16 +249,16 @@ public class BZRFlag {
             String callSign = matcher.group(2);
             Tank.TankStatus status = Tank.TankStatus.valueOf(matcher.group(3).toUpperCase());
             int shotsAvail = Integer.parseInt(matcher.group(4));
-            double timeToReload = Double.parseDouble(matcher.group(5));
+            double timeToReload = parseDouble(matcher.group(5));
             Tank.TeamColor flagColor = matcher.group(6).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(4).toUpperCase());
-            double xPos = Double.parseDouble(matcher.group(7));
-            double yPos = Double.parseDouble(matcher.group(8));
+            double xPos = parseDouble(matcher.group(7));
+            double yPos = parseDouble(matcher.group(8));
             Vector tankPos = new Vector(xPos, yPos);
-            double angle = Double.parseDouble(matcher.group(9));
-            double xVel = Double.parseDouble(matcher.group(10));
-            double yVel = Double.parseDouble(matcher.group(11));
+            double angle = parseDouble(matcher.group(9));
+            double xVel = parseDouble(matcher.group(10));
+            double yVel = parseDouble(matcher.group(11));
             Vector vel = new Vector(xVel, yVel);
-            double angVel = Double.parseDouble(matcher.group(12));
+            double angVel = parseDouble(matcher.group(12));
 
             MyTank tank = new MyTank(index,
                     callSign,
@@ -327,7 +321,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 50271);
+        BZRFlag blueServer = new BZRFlag("localhost", 44512);
         DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
             dumbAgent.tick();
