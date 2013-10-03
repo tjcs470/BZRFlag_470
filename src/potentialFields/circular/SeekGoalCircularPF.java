@@ -13,8 +13,8 @@ import potentialFields.CircularPotentialField;
 public class SeekGoalCircularPF extends CircularPotentialField {
 
     private double sDistance;
-    public SeekGoalCircularPF(double radius, Point2D center, double sDistance) {
-        super(radius, center);
+    public SeekGoalCircularPF(double radius, Point2D center, double sDistance, double alpha) {
+        super(radius, center, alpha);
         this.sDistance = sDistance;
     }
 
@@ -26,10 +26,10 @@ public class SeekGoalCircularPF extends CircularPotentialField {
         double angle = getAngleToPotentialField(location);
         if(distance < sDistance) {
             return new Vector(
-                    (distance - sDistance) * Math.cos(angle),
-                    (distance - sDistance) * Math.sin(angle));
+                    alpha * distance * Math.cos(angle), //do not need to subtract "radius" because distance is to the outside of the polygon (not the center)
+                    alpha * distance * Math.sin(angle));
         }
 
-        return new Vector(Math.cos(angle), Math.sin(angle));
+        return new Vector(alpha * Math.cos(angle), alpha * Math.sin(angle));
     }
 }

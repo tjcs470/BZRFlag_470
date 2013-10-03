@@ -12,8 +12,8 @@ public class AvoidObstacleTangentialCircularPF extends AvoidObstacleCircularPF {
 
     private boolean clockwise;
 
-    public AvoidObstacleTangentialCircularPF(double radius, Point2D center, double sDistance, boolean clockwise) {
-        super(radius, center, sDistance);
+    public AvoidObstacleTangentialCircularPF(double radius, Point2D center, double sDistance, boolean clockwise, double alpha) {
+        super(radius, center, sDistance, alpha);
         this.clockwise = clockwise;
     }
 

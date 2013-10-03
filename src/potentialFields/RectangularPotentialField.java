@@ -18,11 +18,8 @@ public abstract class RectangularPotentialField extends PotentialField {
     private SimplePolygon2D polygon;
     protected double alpha;
 
-    protected RectangularPotentialField(double alpha, Point2D... points) { //can also be constructed with array
-        this(alpha, Arrays.asList(points));
-    }
-
     protected RectangularPotentialField(double alpha, List<Point2D> points) {
+        super(alpha);
         this.points = points;
         this.alpha = alpha;
         polygon = new SimplePolygon2D(points);

@@ -15,7 +15,8 @@ public abstract class CircularPotentialField extends PotentialField {
     private double radius;
     private Point2D center;
 
-    public CircularPotentialField(double radius, Point2D center) {
+    public CircularPotentialField(double radius, Point2D center, double alpha) {
+        super(alpha);
         this.radius = radius;
         this.center = center;
     }

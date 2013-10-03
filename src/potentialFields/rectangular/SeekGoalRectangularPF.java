@@ -4,6 +4,8 @@ import main.Vector;
 import math.geom2d.Point2D;
 import potentialFields.RectangularPotentialField;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: larsojor
@@ -14,7 +16,7 @@ public class SeekGoalRectangularPF extends RectangularPotentialField {
 
     private double sDistance;
 
-    public SeekGoalRectangularPF(double sDistance, double alpha, Point2D... points) {
+    public SeekGoalRectangularPF(double sDistance, double alpha, List<Point2D> points) {
         super(alpha, points);
         this.sDistance = sDistance;
     }
@@ -29,11 +31,11 @@ public class SeekGoalRectangularPF extends RectangularPotentialField {
         double angle = getAngleToPotentialField(location);
         if(distance < sDistance) {
             return new Vector(
-                    (distance - sDistance) * Math.cos(angle),
-                    (distance - sDistance) * Math.sin(angle));
+                    alpha * distance * Math.cos(angle), //do not need to subtract "radius" because distance is to the outside of the polygon (not the center)
+                    alpha * distance * Math.sin(angle));
         }
 
-        return new Vector(Math.cos(angle), Math.sin(angle));
+        return new Vector(alpha * Math.cos(angle), alpha * Math.sin(angle));
 
     }
 

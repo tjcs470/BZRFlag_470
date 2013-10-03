@@ -14,19 +14,16 @@ import java.util.Random;
  */
 public class RandomPotentialField extends PotentialField {
 
-    private double maxX;
-    private double maxY;
     private Random gen;
 
-    public RandomPotentialField(double maxX, double maxY) {
-        this.maxX = maxX;
-        this.maxY = maxY;
+    public RandomPotentialField(double alpha) {
+        super(alpha);
         gen = new Random();
     }
 
     @Override
     public Vector getVectorForce(Point2D location) {
-        return new Vector(maxX * gen.nextDouble(), maxY * gen.nextDouble());
+        return new Vector(alpha * gen.nextDouble(), alpha * gen.nextDouble());
     }
 
     @Override
@@ -41,8 +38,6 @@ public class RandomPotentialField extends PotentialField {
 
     @Override
     public double getAngleToPotentialField(Point2D location) {
-        return gen.nextDouble() * 2 * Math.PI; //TODO - degrees or radians?
-        //return gen.nextDouble() * 360;
-
+        return gen.nextDouble() * 2 * Math.PI;
     }
 }

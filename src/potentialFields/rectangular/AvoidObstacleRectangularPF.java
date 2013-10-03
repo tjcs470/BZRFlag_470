@@ -18,11 +18,6 @@ public class AvoidObstacleRectangularPF extends RectangularPotentialField {
 
     private double sDistance;
 
-    public AvoidObstacleRectangularPF(double sDistance, double alpha, Point2D... points) {
-        super(alpha, points);
-        this.sDistance = sDistance;
-    }
-
     public AvoidObstacleRectangularPF(List<Point2D> points, double sDistance, double alpha) {
         super(alpha, points);
         this.sDistance = sDistance;
@@ -34,7 +29,8 @@ public class AvoidObstacleRectangularPF extends RectangularPotentialField {
         double angle = getAngleToPotentialField(location);
         if(isPointOnPotentialField(location)) {
             System.out.println("WARNING: LOCATION IS ON REPULSIVE FIELD");
-            return new Vector(-Math.cos(angle) * POSITIVE_INFINITY, -Math.sin(angle) * POSITIVE_INFINITY);
+            //return new Vector(-Math.cos(angle) * POSITIVE_INFINITY, -Math.sin(angle) * POSITIVE_INFINITY);
+            return emptyVector();
         }
 
         double distance = getDistanceToPotentialField(location);
@@ -42,8 +38,9 @@ public class AvoidObstacleRectangularPF extends RectangularPotentialField {
         if(distance > sDistance) {
             return emptyVector();  // far away, no influence
         }
+
         return new Vector(
-                alpha *(sDistance - distance) * Math.cos(angle),
-                alpha * (sDistance-distance) * Math.cos(angle));
+                alpha * (sDistance - distance) * Math.cos(angle),
+                alpha * (sDistance - distance) * Math.sin(angle));
     }
 }

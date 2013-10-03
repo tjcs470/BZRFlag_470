@@ -15,6 +15,12 @@ import java.util.List;
  */
 public abstract class PotentialField {
 
+    protected double alpha;
+
+    protected PotentialField(double alpha) {
+        this.alpha = alpha;
+    }
+
     public abstract Vector getVectorForce(Point2D location);
     public abstract boolean isPointOnPotentialField(Point2D location);
     public abstract double getDistanceToPotentialField(Point2D location);
