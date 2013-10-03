@@ -12,7 +12,7 @@ import potentialFields.PotentialField;
  */
 public abstract class CircularPotentialField extends PotentialField {
 
-    private double radius;
+    protected double radius;
     private Point2D center;
 
     public CircularPotentialField(double radius, Point2D center, double alpha) {
@@ -22,13 +22,13 @@ public abstract class CircularPotentialField extends PotentialField {
     }
 
     @Override
-    public double getDistanceToPotentialField(Point2D location) {
+    public double getDistanceToCenterOfPotentialField(Point2D location) {
         return Point2D.distance(center, location);
     }
 
     @Override
     public boolean isPointOnPotentialField(Point2D location) {
-        return getDistanceToPotentialField(location) < radius;
+        return getDistanceToCenterOfPotentialField(location) <= radius;
     }
 
     @Override
@@ -36,4 +36,8 @@ public abstract class CircularPotentialField extends PotentialField {
         return Math.atan2(center.y() - location.y(), center.x() - location.x());
     }
 
+    @Override
+    public double getDistanceToOutsideOfPotentialField(Point2D location) {
+        return getDistanceToCenterOfPotentialField(location) - radius;
+    }
 }

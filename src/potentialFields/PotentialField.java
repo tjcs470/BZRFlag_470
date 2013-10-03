@@ -16,6 +16,7 @@ import java.util.List;
 public abstract class PotentialField {
 
     protected double alpha;
+    protected int sign = 1;
 
     protected PotentialField(double alpha) {
         this.alpha = alpha;
@@ -23,8 +24,13 @@ public abstract class PotentialField {
 
     public abstract Vector getVectorForce(Point2D location);
     public abstract boolean isPointOnPotentialField(Point2D location);
-    public abstract double getDistanceToPotentialField(Point2D location);
+    public abstract double getDistanceToOutsideOfPotentialField(Point2D location);
+    public abstract double getDistanceToCenterOfPotentialField(Point2D location);
     public abstract double getAngleToPotentialField(Point2D location);
+
+    public void switchSign(){
+        sign = -sign;
+    }
 
     public static Vector emptyVector() {
         return new Vector(0.0, 0.0);

@@ -33,14 +33,14 @@ public class AvoidObstacleRectangularPF extends RectangularPotentialField {
             return emptyVector();
         }
 
-        double distance = getDistanceToPotentialField(location);
+        double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
 
-        if(distance > sDistance) {
+        if(distanceToOutside > sDistance) {
             return emptyVector();  // far away, no influence
         }
 
         return new Vector(
-                alpha * (sDistance - distance) * Math.cos(angle),
-                alpha * (sDistance - distance) * Math.sin(angle));
+                sign * -alpha * (sDistance - distanceToOutside) * Math.cos(angle),
+                sign * -alpha * (sDistance - distanceToOutside) * Math.sin(angle));
     }
 }

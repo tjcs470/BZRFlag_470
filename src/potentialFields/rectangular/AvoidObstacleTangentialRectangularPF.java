@@ -16,7 +16,7 @@ public class AvoidObstacleTangentialRectangularPF extends AvoidObstacleRectangul
 
     private boolean clockwise;
 
-    public AvoidObstacleTangentialRectangularPF(List<Point2D> points, double alpha, double sDistance, boolean clockwise) {
+    public AvoidObstacleTangentialRectangularPF(List<Point2D> points, double sDistance, boolean clockwise, double alpha) {
         super(points, sDistance, alpha);
         this.clockwise = clockwise;
     }

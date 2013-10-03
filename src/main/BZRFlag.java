@@ -352,7 +352,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 33001);
+        BZRFlag blueServer = new BZRFlag("localhost", 47337);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         pfAgent.plotPfs();
 

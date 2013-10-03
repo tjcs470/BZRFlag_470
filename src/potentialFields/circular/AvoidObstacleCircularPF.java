@@ -29,18 +29,18 @@ public class AvoidObstacleCircularPF extends CircularPotentialField {
         double angle = getAngleToPotentialField(location);
         if(isPointOnPotentialField(location)) {
             System.out.println("WARNING: LOCATION IS ON REPULSIVE FIELD");
-//            return new Vector(-Math.cos(angle) * POSITIVE_INFINITY, -Math.sin(angle) * POSITIVE_INFINITY);
+            //return new Vector(-Math.cos(angle) * POSITIVE_INFINITY, -Math.sin(angle) * POSITIVE_INFINITY);
             return emptyVector();
         }
 
-        double distance = getDistanceToPotentialField(location);
+        double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
 
-        if(distance > sDistance) {
+        if(distanceToOutside > sDistance) {
             return emptyVector();  // far away, no influence
         }
 
         return new Vector(
-                alpha * (sDistance - distance) * Math.cos(angle),
-                alpha * (sDistance - distance) * Math.sin(angle));
+                sign * -alpha * (sDistance - distanceToOutside) * Math.cos(angle),
+                sign * -alpha * (sDistance - distanceToOutside) * Math.sin(angle));
     }
 }

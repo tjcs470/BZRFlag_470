@@ -26,8 +26,13 @@ public abstract class RectangularPotentialField extends PotentialField {
     }
 
     @Override
-    public double getDistanceToPotentialField(Point2D location) {
+    public double getDistanceToOutsideOfPotentialField(Point2D location) {
         return polygon.distance(location);
+    }
+
+    @Override
+    public double getDistanceToCenterOfPotentialField(Point2D location) {
+        return Point2D.distance(location, polygon.centroid());
     }
 
     @Override

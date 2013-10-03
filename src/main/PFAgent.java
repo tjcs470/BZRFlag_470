@@ -51,16 +51,16 @@ public class PFAgent {
         mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 10.0, 0.4);
-            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 0.5, 10, true);
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 250.0, .15);
+            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 350, true, .1);
             mPotentialFields.add(rectPF);
-            //mPotentialFields.add(tangRectPf);
+            mPotentialFields.add(tangRectPf);
         }
 
         ArrayList<Flag> flags = mServer.getFlags();
         for(Flag flag : flags) {
             if(flag.getTeamColor() != teamColor) {
-                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 10);
+                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 100, .1);
                 break;
             }
         }
@@ -80,15 +80,15 @@ public class PFAgent {
 
         gpiFile.println("plot '-' with vectors head");
 
-        //mPotentialFields.add(mFlagPf);
+        mPotentialFields.add(mFlagPf);
         for(double x = -400; x <= 400; x += 50.0) {
             for(double y = -400; y <= 400; y += 50.0) {
                 Vector pos = new Vector(x, y);
                 Vector force = PotentialField.getNetVector(pos, mPotentialFields);
-                gpiFile.println(String.format("%s %s %s %s", x, y, 500 * force.x(), 500 * force.y()));
+                gpiFile.println(String.format("%s %s %s %s", x, y, force.x(), force.y()));
             }
         }
-        //mPotentialFields.remove(mFlagPf);
+        mPotentialFields.remove(mFlagPf);
 
         gpiFile.println("e");
         gpiFile.close();

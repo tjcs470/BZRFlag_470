@@ -27,15 +27,18 @@ public class SeekGoalRectangularPF extends RectangularPotentialField {
             return emptyVector();
         }
 
-        double distance = getDistanceToPotentialField(location);
+        double distanceToCenter = getDistanceToCenterOfPotentialField(location);
+        double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
         double angle = getAngleToPotentialField(location);
-        if(distance < sDistance) {
+        if(distanceToOutside < sDistance) {
             return new Vector(
-                    alpha * distance * Math.cos(angle), //do not need to subtract "radius" because distance is to the outside of the polygon (not the center)
-                    alpha * distance * Math.sin(angle));
+                    sign * alpha * distanceToOutside * Math.cos(angle), //do not need to subtract "radius" because distance is to the outside of the polygon (not the center)
+                    sign * alpha * distanceToOutside * Math.sin(angle));
         }
 
-        return new Vector(alpha * Math.cos(angle), alpha * Math.sin(angle));
+        return new Vector(
+                sign * alpha * distanceToCenter * Math.cos(angle),
+                sign * alpha * distanceToCenter * Math.sin(angle));
 
     }
 

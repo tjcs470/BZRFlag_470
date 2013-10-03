@@ -32,7 +32,12 @@ public class RandomPotentialField extends PotentialField {
     }
 
     @Override
-    public double getDistanceToPotentialField(Point2D location) {
+    public double getDistanceToOutsideOfPotentialField(Point2D location) {
+        return 0;
+    }
+
+    @Override
+    public double getDistanceToCenterOfPotentialField(Point2D location) {
         return 0;
     }
 
