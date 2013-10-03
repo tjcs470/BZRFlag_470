@@ -53,8 +53,8 @@ public class PFAgent {
         for(Obstacle obstacle : obstacles) {
             AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 10.0, 0.4);
             AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 0.5, 10, true);
-            //mPotentialFields.add(rectPF);
-            mPotentialFields.add(tangRectPf);
+            mPotentialFields.add(rectPF);
+            //mPotentialFields.add(tangRectPf);
         }
 
         ArrayList<Flag> flags = mServer.getFlags();
@@ -80,15 +80,15 @@ public class PFAgent {
 
         gpiFile.println("plot '-' with vectors head");
 
-        mPotentialFields.add(mFlagPf);
+        //mPotentialFields.add(mFlagPf);
         for(double x = -400; x <= 400; x += 50.0) {
             for(double y = -400; y <= 400; y += 50.0) {
                 Vector pos = new Vector(x, y);
                 Vector force = PotentialField.getNetVector(pos, mPotentialFields);
-                gpiFile.println(String.format("%s %s %s %s", x, y, force.x() + x, force.y() + y));
+                gpiFile.println(String.format("%s %s %s %s", x, y, 500 * force.x(), 500 * force.y()));
             }
         }
-        mPotentialFields.remove(mFlagPf);
+        //mPotentialFields.remove(mFlagPf);
 
         gpiFile.println("e");
         gpiFile.close();
