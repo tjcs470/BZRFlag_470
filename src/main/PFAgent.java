@@ -1,6 +1,7 @@
 package main;
 
 import ServerResponse.Flag;
+import ServerResponse.GnuplotPrinter;
 import ServerResponse.Obstacle;
 import ServerResponse.Tank;
 import potentialFields.PotentialField;
@@ -9,7 +10,10 @@ import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.AvoidObstacleRectangularPF;
 import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -44,12 +48,13 @@ public class PFAgent {
 
         mPrevTime = System.currentTimeMillis();
 
+        mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
             AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 10.0, 0.4);
             AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 0.5, 10, true);
             mPotentialFields.add(rectPF);
-            mPotentialFields.add(tangRectPf);
+            //mPotentialFields.add(tangRectPf);
         }
 
         ArrayList<Flag> flags = mServer.getFlags();
@@ -61,13 +66,32 @@ public class PFAgent {
         }
     }
 
-    public void plotPfs() {
-        for(double x = -400; x <= 400; x += 5.0) {
-            for(double y = -400; y <= 400; y += 5.0) {
+    public void plotPfs() throws IOException {
+        ArrayList<Obstacle> obstacles = mServer.getObstacles();
+
+        PrintWriter gpiFile = new PrintWriter("world.gpi", "UTF-8");
+        gpiFile.println("set xrange [-400.0: 400.0]");
+        gpiFile.println("set yrange [-400.0: 400.0]");
+        gpiFile.println("unset arrow");
+
+        for(Obstacle obstacle : obstacles) {
+            gpiFile.println(GnuplotPrinter.getObstaclePlotCmds(obstacle));
+        }
+
+        gpiFile.println("plot '-' with vectors head");
+
+        //mPotentialFields.add(mFlagPf);
+        for(double x = -400; x <= 400; x += 50.0) {
+            for(double y = -400; y <= 400; y += 50.0) {
                 Vector pos = new Vector(x, y);
                 Vector force = PotentialField.getNetVector(pos, mPotentialFields);
+                gpiFile.println(String.format("%s %s %s %s", x, y, 500 * force.x(), 500 * force.y()));
             }
         }
+        //mPotentialFields.remove(mFlagPf);
+
+        gpiFile.println("e");
+        gpiFile.close();
     }
 
     /**

@@ -44,7 +44,7 @@ public class Obstacle {
     }
 
     public List<Point2D> getPoints() {
-        Point2D[] points = {mP0, mP1, mP2, mP3};
+        Point2D[] points = {mP3, mP2, mP1, mP0};
         return Arrays.asList(points);
     }
 }
