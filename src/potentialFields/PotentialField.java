@@ -33,7 +33,8 @@ public abstract class PotentialField {
         List<Vector> vectors = new ArrayList<Vector>();
         for(PotentialField field : fields) {
             if(field == null) continue;
-            vectors.add(field.getVectorForce(location));
+            Vector add = field.getVectorForce(location);
+            vectors.add(add);
         }
         return sumVectors(vectors);
     }

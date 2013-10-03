@@ -1,10 +1,19 @@
 package main;
 
+import ServerResponse.Flag;
+import ServerResponse.GnuplotPrinter;
 import ServerResponse.Obstacle;
 import ServerResponse.Tank;
+import potentialFields.PotentialField;
+import potentialFields.circular.AvoidObstacleTangentialCircularPF;
+import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.AvoidObstacleRectangularPF;
+import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -22,6 +31,10 @@ public class PFAgent {
     private double mPrevTime;
     /**My team color*/
     private Tank.TeamColor mTeamColor;
+    /**Potential fields in the world*/
+    private ArrayList<PotentialField> mPotentialFields;
+    /**PF for flag*/
+    private SeekGoalCircularPF mFlagPf;
 
     /**
      * Constructor
@@ -35,14 +48,52 @@ public class PFAgent {
 
         mPrevTime = System.currentTimeMillis();
 
-        // download the world
+        mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints());
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 10.0, 0.4);
+            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 0.5, 10, true);
+            //mPotentialFields.add(rectPF);
+            mPotentialFields.add(tangRectPf);
         }
 
-        // put create potential fields based on the obstacles
+        ArrayList<Flag> flags = mServer.getFlags();
+        for(Flag flag : flags) {
+            if(flag.getTeamColor() != teamColor) {
+                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 10);
+                break;
+            }
+        }
     }
+
+    public void plotPfs() throws IOException {
+        ArrayList<Obstacle> obstacles = mServer.getObstacles();
+
+        PrintWriter gpiFile = new PrintWriter("world.gpi", "UTF-8");
+        gpiFile.println("set xrange [-400.0: 400.0]");
+        gpiFile.println("set yrange [-400.0: 400.0]");
+        gpiFile.println("unset arrow");
+
+        for(Obstacle obstacle : obstacles) {
+            gpiFile.println(GnuplotPrinter.getObstaclePlotCmds(obstacle));
+        }
+
+        gpiFile.println("plot '-' with vectors head");
+
+        mPotentialFields.add(mFlagPf);
+        for(double x = -400; x <= 400; x += 50.0) {
+            for(double y = -400; y <= 400; y += 50.0) {
+                Vector pos = new Vector(x, y);
+                Vector force = PotentialField.getNetVector(pos, mPotentialFields);
+                gpiFile.println(String.format("%s %s %s %s", x, y, force.x() + x, force.y() + y));
+            }
+        }
+        mPotentialFields.remove(mFlagPf);
+
+        gpiFile.println("e");
+        gpiFile.close();
+    }
+
     /**
      * Some time has passed; decide what to do.
      */

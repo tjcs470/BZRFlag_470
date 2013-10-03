@@ -278,6 +278,37 @@ public class BZRFlag {
         return myTanks;
     }
 
+    public ArrayList<Flag> getFlags() throws IOException {
+        String queryCmd = "flags";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+
+        Pattern flagLine = Pattern.compile(
+                "flag (.*?) (.*?) (.*?) (.*?)"
+        );
+
+        ArrayList<Flag> flags = new ArrayList<Flag>();
+
+        Matcher matcher = null;
+        String arrayLine = readOneReplyLine();
+        assert(arrayLine.equals("begin"));
+        arrayLine = readOneReplyLine();
+        while(!arrayLine.equals("end")) {
+            matcher = flagLine.matcher(arrayLine);
+            assert(matcher.matches());
+
+            Tank.TeamColor flagColor = Tank.TeamColor.valueOf(matcher.group(1).toUpperCase());
+            Tank.TeamColor possessingTeamColor = Tank.TeamColor.valueOf(matcher.group(2).toUpperCase());
+            double xPos = parseDouble(matcher.group(3));
+            double yPos = parseDouble(matcher.group(4));
+            Flag flag = new Flag(flagColor, possessingTeamColor, new Vector(xPos, yPos));
+            flags.add(flag);
+            arrayLine = readOneReplyLine();
+        }
+
+        return flags;
+    }
+
     public static void plotWorld() throws IOException {
         BZRFlag agent = new BZRFlag("localhost", 33925);
         agent.handshake();
@@ -321,10 +352,14 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 50511);
-        DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
+        BZRFlag blueServer = new BZRFlag("localhost", 33001);
+        PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
+        pfAgent.plotPfs();
+
+        /*DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
             dumbAgent.tick();
-        }
+        }*/
+
     }
 }
