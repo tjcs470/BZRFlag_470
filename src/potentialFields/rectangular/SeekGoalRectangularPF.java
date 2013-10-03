@@ -14,8 +14,8 @@ public class SeekGoalRectangularPF extends RectangularPotentialField {
 
     private double sDistance;
 
-    public SeekGoalRectangularPF(double sDistance, Point2D... points) {
-        super(points);
+    public SeekGoalRectangularPF(double sDistance, double alpha, Point2D... points) {
+        super(alpha, points);
         this.sDistance = sDistance;
     }
 

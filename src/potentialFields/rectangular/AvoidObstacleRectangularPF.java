@@ -18,13 +18,13 @@ public class AvoidObstacleRectangularPF extends RectangularPotentialField {
 
     private double sDistance;
 
-    public AvoidObstacleRectangularPF(double sDistance, Point2D... points) {
-        super(points);
+    public AvoidObstacleRectangularPF(double sDistance, double alpha, Point2D... points) {
+        super(alpha, points);
         this.sDistance = sDistance;
     }
 
-    public AvoidObstacleRectangularPF(List<Point2D> points, double sDistance) {
-        super(points);
+    public AvoidObstacleRectangularPF(List<Point2D> points, double sDistance, double alpha) {
+        super(alpha, points);
         this.sDistance = sDistance;
     }
 
@@ -42,9 +42,8 @@ public class AvoidObstacleRectangularPF extends RectangularPotentialField {
         if(distance > sDistance) {
             return emptyVector();  // far away, no influence
         }
-        double beta = 1;  //TODO - not sure what this should be
         return new Vector(
-                beta *(sDistance - distance) * Math.cos(angle),
-                beta * (sDistance-distance) * Math.cos(angle));
+                alpha *(sDistance - distance) * Math.cos(angle),
+                alpha * (sDistance-distance) * Math.cos(angle));
     }
 }
