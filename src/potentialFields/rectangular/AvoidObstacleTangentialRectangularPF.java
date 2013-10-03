@@ -28,7 +28,6 @@ public class AvoidObstacleTangentialRectangularPF extends AvoidObstacleRectangul
 
     public double getAngleToPotentialField(Point2D location) {
         double angle = super.getAngleToPotentialField(location);
-        System.out.println("angle to origin:" + angle);
         return clockwise ? angle - Math.PI/2.0 : angle + Math.PI/2.0;
     }
 }

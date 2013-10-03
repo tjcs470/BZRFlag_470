@@ -28,12 +28,13 @@ public class TestTangentialPF {
     @Test
     public void testRectTangPF() {
         PotentialField pf = new AvoidObstacleTangentialRectangularPF(0, true,
-                new Point2D(-1, -1), new Point2D(-1,1), new Point2D(1,1), new Point2D(1,-1)); //sqaure around origin
+                new Point2D(-1, -1), new Point2D(1,-1), new Point2D(1,1), new Point2D(-1,1)); //sqaure around origin
 
         assertTrue(pf.isPointOnPotentialField(new Point2D(0, 0)));
         assertFalse(pf.isPointOnPotentialField(new Point2D(0, 2)));
 
         assertEquals(0.0, pf.getAngleToPotentialField(new Point2D(0, -2)));
         assertEquals(-Math.PI, pf.getAngleToPotentialField(new Point2D(0, 2)));
+        assertEquals(1.0, pf.getDistanceToPotentialField(new Point2D(0, -2)));
     }
 }
