@@ -27,7 +27,7 @@ public class TestTangentialPF {
 
     @Test
     public void testRectTangPF() {
-        PotentialField pf = new AvoidObstacleTangentialRectangularPF(0, true,
+        PotentialField pf = new AvoidObstacleTangentialRectangularPF(0, 1, true,
                 new Point2D(-1, -1), new Point2D(1,-1), new Point2D(1,1), new Point2D(-1,1)); //sqaure around origin
 
         assertTrue(pf.isPointOnPotentialField(new Point2D(0, 0)));
