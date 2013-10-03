@@ -2,6 +2,10 @@ package ServerResponse;
 
 import main.Vector;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: ty
@@ -36,5 +40,10 @@ public class Obstacle {
 
     public Vector getP3() {
         return mP3;
+    }
+
+    public List<Vector> getPoints() {
+        Vector[] points = {mP0, mP1, mP2, mP3};
+        return Arrays.asList(points);
     }
 }

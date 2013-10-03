@@ -1,8 +1,11 @@
 package main;
 
+import ServerResponse.Obstacle;
 import ServerResponse.Tank;
+import potentialFields.rectangular.AvoidObstacleRectangularPF;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +34,14 @@ public class PFAgent {
         mTeamColor = teamColor;
 
         mPrevTime = System.currentTimeMillis();
+
+        // download the world
+        ArrayList<Obstacle> obstacles = mServer.getObstacles();
+        for(Obstacle obstacle : obstacles) {
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints());
+        }
+
+        // put create potential fields based on the obstacles
     }
     /**
      * Some time has passed; decide what to do.
