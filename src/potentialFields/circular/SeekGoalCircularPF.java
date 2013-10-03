@@ -33,7 +33,7 @@ public class SeekGoalCircularPF extends CircularPotentialField {
                     sign * alpha * distanceToOutside * Math.sin(angle));
         }
 
-        return new Vector(sign * alpha * distanceToCenter * Math.cos(angle), sign * alpha * distanceToCenter * Math.sin(angle));
+        return new Vector(sign * alpha * sDistance * Math.cos(angle), sign * alpha * sDistance * Math.sin(angle));
 
     }
 }

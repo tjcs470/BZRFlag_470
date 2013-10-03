@@ -4,6 +4,7 @@ import ServerResponse.Flag;
 import ServerResponse.GnuplotPrinter;
 import ServerResponse.Obstacle;
 import ServerResponse.Tank;
+import math.geom2d.Point2D;
 import potentialFields.PotentialField;
 import potentialFields.circular.AvoidObstacleTangentialCircularPF;
 import potentialFields.circular.SeekGoalCircularPF;
@@ -48,21 +49,31 @@ public class PFAgent {
 
         mPrevTime = System.currentTimeMillis();
 
-        mPotentialFields = new ArrayList<PotentialField>();
-        ArrayList<Obstacle> obstacles = mServer.getObstacles();
-        for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 250.0, .15);
-            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 350, true, .1);
-            mPotentialFields.add(rectPF);
-            mPotentialFields.add(tangRectPf);
-        }
-
         ArrayList<Flag> flags = mServer.getFlags();
         for(Flag flag : flags) {
             if(flag.getTeamColor() != teamColor) {
-                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 100, .1);
+                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 100, .3);
                 break;
             }
+        }
+
+        mPotentialFields = new ArrayList<PotentialField>();
+        ArrayList<Obstacle> obstacles = mServer.getObstacles();
+        for(Obstacle obstacle : obstacles) {
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .25);
+            mPotentialFields.add(rectPF);
+
+            // calculate the relationship of obstacle center to the goal
+            Point2D obsCentroid = Point2D.centroid(obstacle.getPoints());
+            Point2D goalToCentroid = new Point2D(new Point2D(obsCentroid.x() - mFlagPf.getCenter().x(),
+                                                        obsCentroid.y() - mFlagPf.getCenter().y()));
+            int quadrant = Util.GeometryUtils.getQuadrant(goalToCentroid);
+            boolean clockwise = true;
+            if(quadrant == 1 || quadrant == 3)
+                clockwise = false;
+
+            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 120, clockwise, .15);
+            mPotentialFields.add(tangRectPf);
         }
     }
 

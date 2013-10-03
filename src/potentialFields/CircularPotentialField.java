@@ -40,4 +40,8 @@ public abstract class CircularPotentialField extends PotentialField {
     public double getDistanceToOutsideOfPotentialField(Point2D location) {
         return getDistanceToCenterOfPotentialField(location) - radius;
     }
+
+    public Point2D getCenter() {
+        return center;
+    }
 }
