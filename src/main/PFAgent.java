@@ -1,20 +1,14 @@
 package main;
 
-import ServerResponse.Flag;
-import ServerResponse.GnuplotPrinter;
-import ServerResponse.Obstacle;
-import ServerResponse.Tank;
+import ServerResponse.*;
 import math.geom2d.Point2D;
 import potentialFields.PotentialField;
-import potentialFields.circular.AvoidObstacleTangentialCircularPF;
 import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.AvoidObstacleRectangularPF;
 import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -36,22 +30,30 @@ public class PFAgent {
     private ArrayList<PotentialField> mPotentialFields;
     /**PF for flag*/
     private SeekGoalCircularPF mFlagPf;
+    /**PD Controller for angles*/
+    PDAngVelController mPdAngVelController;
 
     /**
      * Constructor
      */
-    public PFAgent(BZRFlag teamConnection, Tank.TeamColor teamColor) throws IOException {
+    public PFAgent(BZRFlag teamConnection, Tank.TeamColor myTeamColor) throws IOException {
         //mServer = new BZRFlag("localhost", 38508);
         mServer = teamConnection;
         mServer.handshake();
-
-        mTeamColor = teamColor;
-
+        mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
+        mPdAngVelController = new PDAngVelController(.2, -.1);
+        buildPotentialFields(myTeamColor);
+        plotPfs();
+    }
 
+    /**
+     * Builds up the potential fields
+     */
+    private void buildPotentialFields(Tank.TeamColor myTeamColor) throws IOException {
         ArrayList<Flag> flags = mServer.getFlags();
         for(Flag flag : flags) {
-            if(flag.getTeamColor() != teamColor) {
+            if(flag.getTeamColor() != myTeamColor) {
                 mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 100, .3);
                 break;
             }
@@ -60,13 +62,13 @@ public class PFAgent {
         mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .25);
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .35);
             mPotentialFields.add(rectPF);
 
             // calculate the relationship of obstacle center to the goal
             Point2D obsCentroid = Point2D.centroid(obstacle.getPoints());
             Point2D goalToCentroid = new Point2D(new Point2D(obsCentroid.x() - mFlagPf.getCenter().x(),
-                                                        obsCentroid.y() - mFlagPf.getCenter().y()));
+                    obsCentroid.y() - mFlagPf.getCenter().y()));
             int quadrant = Util.GeometryUtils.getQuadrant(goalToCentroid);
             boolean clockwise = true;
             if(quadrant == 1 || quadrant == 3)
@@ -109,6 +111,31 @@ public class PFAgent {
      * Some time has passed; decide what to do.
      */
     public void tick() throws IOException {
+        double newTime = System.currentTimeMillis();
+        double timeDiffInSec = (newTime - mPrevTime) / 1000;
+        mPrevTime = newTime;
+
+        ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
+        int pfTankIndex = 2;
+        MyTank pfTank0 = myTanks.get(pfTankIndex);
+
+        // get the goal angle
+        double currAng = pfTank0.getAngle();
+        double currAngVel = pfTank0.getAngVel();
+        mPotentialFields.add(mFlagPf);
+        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields);
+        mPotentialFields.remove(mFlagPf);
+
+        double angAcceleration = mPdAngVelController.getAcceleration(goalAngle, currAng, timeDiffInSec);
+        double targetVel = currAngVel + angAcceleration;
+        boolean needsNormalization = StrictMath.abs(targetVel) > 1.0;
+        if(needsNormalization)
+            targetVel = targetVel / StrictMath.abs(targetVel);
+
+        mServer.angVel(pfTankIndex, targetVel);
+        mServer.speed(pfTankIndex, 1.0);
+        mServer.shoot(pfTankIndex);
+
         /*ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
         double newTime = System.currentTimeMillis();
         double timeDiffInSec = (newTime - mPrevTime) / 1000;

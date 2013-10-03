@@ -81,7 +81,8 @@ public class BZRFlag {
     {
         String ackLine = readOneReplyLine();
 
-        Pattern ackRegex = Pattern.compile("ack ([0-9]+\\.[0-9]+) (" + cmdSent + ")");
+        //Pattern ackRegex = Pattern.compile("ack (-?[0-9]+\\.[0-9]+) (" + cmdSent + ")");
+        Pattern ackRegex = Pattern.compile("ack (-?[0-9]+\\.[0-9]+) (.*?)");
         Matcher matcher = ackRegex.matcher(ackLine);
 
         assert(matcher.matches());
@@ -354,7 +355,10 @@ public class BZRFlag {
 
         BZRFlag blueServer = new BZRFlag("localhost", 41837);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
-        pfAgent.plotPfs();
+        while(true) {
+            pfAgent.tick();
+        }
+        //pfAgent.plotPfs();
 
         /*DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
