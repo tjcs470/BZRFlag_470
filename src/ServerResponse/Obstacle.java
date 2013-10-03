@@ -1,6 +1,7 @@
 package ServerResponse;
 
 import main.Vector;
+import math.geom2d.Point2D;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,8 +43,8 @@ public class Obstacle {
         return mP3;
     }
 
-    public List<Vector> getPoints() {
-        Vector[] points = {mP0, mP1, mP2, mP3};
+    public List<Point2D> getPoints() {
+        Point2D[] points = {mP0, mP1, mP2, mP3};
         return Arrays.asList(points);
     }
 }

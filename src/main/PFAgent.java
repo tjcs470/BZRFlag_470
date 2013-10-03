@@ -1,8 +1,13 @@
 package main;
 
+import ServerResponse.Flag;
 import ServerResponse.Obstacle;
 import ServerResponse.Tank;
+import potentialFields.PotentialField;
+import potentialFields.circular.AvoidObstacleTangentialCircularPF;
+import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.AvoidObstacleRectangularPF;
+import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +27,10 @@ public class PFAgent {
     private double mPrevTime;
     /**My team color*/
     private Tank.TeamColor mTeamColor;
+    /**Potential fields in the world*/
+    private ArrayList<PotentialField> mPotentialFields;
+    /**PF for flag*/
+    private SeekGoalCircularPF mFlagPf;
 
     /**
      * Constructor
@@ -35,14 +44,32 @@ public class PFAgent {
 
         mPrevTime = System.currentTimeMillis();
 
-        // download the world
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints());
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 10.0, 0.4);
+            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 0.5, 10, true);
+            mPotentialFields.add(rectPF);
+            mPotentialFields.add(tangRectPf);
         }
 
-        // put create potential fields based on the obstacles
+        ArrayList<Flag> flags = mServer.getFlags();
+        for(Flag flag : flags) {
+            if(flag.getTeamColor() != teamColor) {
+                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 10);
+                break;
+            }
+        }
     }
+
+    public void plotPfs() {
+        for(double x = -400; x <= 400; x += 5.0) {
+            for(double y = -400; y <= 400; y += 5.0) {
+                Vector pos = new Vector(x, y);
+                Vector force = PotentialField.getNetVector(pos, mPotentialFields);
+            }
+        }
+    }
+
     /**
      * Some time has passed; decide what to do.
      */

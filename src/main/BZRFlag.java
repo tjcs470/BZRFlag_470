@@ -278,6 +278,36 @@ public class BZRFlag {
         return myTanks;
     }
 
+    public ArrayList<Flag> getFlags() throws IOException {
+        String queryCmd = "flags";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+
+        Pattern flagLine = Pattern.compile(
+                "flag (.*?) (.*?) (.*?) (.*?)"
+        );
+
+        ArrayList<Flag> flags = new ArrayList<Flag>();
+
+        Matcher matcher = null;
+        String arrayLine = readOneReplyLine();
+        assert(arrayLine.equals("begin"));
+        arrayLine = readOneReplyLine();
+        while(!arrayLine.equals("end")) {
+            matcher = flagLine.matcher(arrayLine);
+            assert(matcher.matches());
+
+            Tank.TeamColor flagColor = Tank.TeamColor.valueOf(matcher.group(1).toUpperCase());
+            Tank.TeamColor possessingTeamColor = Tank.TeamColor.valueOf(matcher.group(2).toUpperCase());
+            double xPos = parseDouble(matcher.group(3));
+            double yPos = parseDouble(matcher.group(4));
+            Flag flag = new Flag(flagColor, possessingTeamColor, new Vector(xPos, yPos));
+            flags.add(flag);
+        }
+
+        return flags;
+    }
+
     public static void plotWorld() throws IOException {
         BZRFlag agent = new BZRFlag("localhost", 33925);
         agent.handshake();
