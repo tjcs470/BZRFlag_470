@@ -24,7 +24,11 @@ public abstract class PotentialField {
         return new Vector(0.0, 0.0);
     }
 
-    public static Vector sumPotentialFields(final Point2D location, PotentialField... fields) {
+    public static double getNetAngle(Point2D location, PotentialField... fields) {
+        return getNetVector(location, fields).getAngle();
+    }
+
+    public static Vector getNetVector(Point2D location, PotentialField... fields) {
         assert location != null;
         List<Vector> vectors = new ArrayList<Vector>();
         for(PotentialField field : fields) {

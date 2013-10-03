@@ -13,4 +13,8 @@ public class Vector extends Point2D {
     public Vector(double x, double y) {
         super(x, y);
     }
+
+    public double getAngle() {
+        return Math.atan2(y, x);
+    }
 }
