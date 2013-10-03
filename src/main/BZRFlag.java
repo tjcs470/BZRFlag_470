@@ -321,7 +321,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 44512);
+        BZRFlag blueServer = new BZRFlag("localhost", 50511);
         DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
             dumbAgent.tick();
