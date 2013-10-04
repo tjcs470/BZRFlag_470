@@ -42,7 +42,7 @@ public class PFAgent {
         mServer.handshake();
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
-        mPdAngVelController = new PDAngVelController(.2, -.1);
+        mPdAngVelController = new PDAngVelController(2, .5);
         buildPotentialFields(myTeamColor);
         plotPfs();
     }
@@ -116,7 +116,7 @@ public class PFAgent {
         mPrevTime = newTime;
 
         ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
-        int pfTankIndex = 2;
+        int pfTankIndex = 1;
         MyTank pfTank0 = myTanks.get(pfTankIndex);
 
         // get the goal angle

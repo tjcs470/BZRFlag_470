@@ -24,4 +24,13 @@ public class GeometryUtils {
 
         return quadrantNum;
     }
+
+    /**
+     * Returns the difference between two angles (ang0 - ang1)
+     */
+    public static double angDiff(double atan2Ang0, double atan2Ang1){
+        double ang0 = (atan2Ang0 < 0 ? Math.PI + (Math.PI + atan2Ang0) : atan2Ang0);
+        double ang1 = (atan2Ang1 < 0 ? Math.PI + (Math.PI + atan2Ang1) : atan2Ang1);
+        return ang0 - ang1;
+    }
 }

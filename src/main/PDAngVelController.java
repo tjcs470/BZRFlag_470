@@ -1,5 +1,7 @@
 package main;
 
+import Util.GeometryUtils;
+
 /**
  * Created with IntelliJ IDEA.
  * User: ty
@@ -22,7 +24,7 @@ public class PDAngVelController {
 
     public double getAcceleration(double goalAng, double currAng, double timeDiff){
         assert(timeDiff > 0.0);
-        double error = goalAng - currAng;
+        double error = GeometryUtils.angDiff(goalAng, currAng);
         double errorDeriv = (error - mPrevError) / timeDiff;
         mPrevError = error;
         double acceleration = mKP * error + mKD * errorDeriv;
