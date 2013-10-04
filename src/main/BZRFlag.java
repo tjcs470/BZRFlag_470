@@ -27,7 +27,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug;
+    private boolean mDebug = false;
 
     /**
      * Constructor
@@ -36,8 +36,6 @@ public class BZRFlag {
         Socket socket = new Socket(host, port);
         mIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         mOut = new PrintWriter(socket.getOutputStream(), true);
-
-        mDebug = true;
     }
 
     /**

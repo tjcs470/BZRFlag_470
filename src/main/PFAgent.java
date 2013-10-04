@@ -111,6 +111,7 @@ public class PFAgent {
      * Some time has passed; decide what to do.
      */
     public void tick() throws IOException {
+        boolean debug = true;
         double newTime = System.currentTimeMillis();
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
@@ -121,13 +122,16 @@ public class PFAgent {
 
         // get the goal angle
         double currAng = pfTank0.getAngle();
+        printAngle("Current", currAng);
         double currAngVel = pfTank0.getAngVel();
-        mPotentialFields.add(mFlagPf);
-        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields);
-        mPotentialFields.remove(mFlagPf);
+
+        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields, mFlagPf);
+        printAngle("Goal", currAng);
 
         double angAcceleration = mPdAngVelController.getAcceleration(goalAngle, currAng, timeDiffInSec);
+        System.out.println("Accel: " + angAcceleration);
         double targetVel = currAngVel + angAcceleration;
+        System.out.println("TargetVel: " + targetVel);
         boolean needsNormalization = StrictMath.abs(targetVel) > 1.0;
         if(needsNormalization)
             targetVel = targetVel / StrictMath.abs(targetVel);
@@ -155,5 +159,9 @@ public class PFAgent {
         if(dumbTank1.shouldShoot())
             mServer.shoot(1);*/
 
+    }
+
+    private void printAngle(String angle, double ang) {
+        System.out.println(angle + " Angle: " + ang + "rads = " + (180 * ang)/Math.PI + "degrees");
     }
 }
