@@ -122,9 +122,7 @@ public class PFAgent {
         // get the goal angle
         double currAng = pfTank0.getAngle();
         double currAngVel = pfTank0.getAngVel();
-        mPotentialFields.add(mFlagPf);
-        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields);
-        mPotentialFields.remove(mFlagPf);
+        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields, mFlagPf);
 
         double angAcceleration = mPdAngVelController.getAcceleration(goalAngle, currAng, timeDiffInSec);
         double targetVel = currAngVel + angAcceleration;

@@ -36,14 +36,19 @@ public abstract class PotentialField {
         return new Vector(0.0, 0.0);
     }
 
-    public static double getNetAngle(Point2D location, List<PotentialField> fields) {
-        return getNetVector(location, fields).getAngle();
+    public static double getNetAngle(Point2D location, List<PotentialField> fields, PotentialField... others) {
+        return getNetVector(location, fields, others).getAngle();
     }
 
-    public static Vector getNetVector(Point2D location, List<PotentialField> fields) {
+    public static Vector getNetVector(Point2D location, List<PotentialField> fields, PotentialField... others) {
         assert location != null;
         List<Vector> vectors = new ArrayList<Vector>();
         for(PotentialField field : fields) {
+            if(field == null) continue;
+            Vector add = field.getVectorForce(location);
+            vectors.add(add);
+        }
+        for(PotentialField field : others) {
             if(field == null) continue;
             Vector add = field.getVectorForce(location);
             vectors.add(add);
