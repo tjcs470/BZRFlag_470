@@ -28,7 +28,7 @@ public abstract class PotentialField {
     public abstract double getDistanceToCenterOfPotentialField(Point2D location);
     public abstract double getAngleToPotentialField(Point2D location);
 
-    public void switchSign(){
+    public void switchSign() {
         sign = -sign;
     }
 
