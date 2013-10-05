@@ -24,13 +24,15 @@ public class SeekGoalCircularPF extends CircularPotentialField {
             return emptyVector();
         }
 
-        double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
+//        double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
         double angle = getAngleToPotentialField(location);
+        /*
         if(distanceToOutside < sDistance) {
             return new Vector(
                     sign * alpha * distanceToOutside * Math.cos(angle), //do not need to subtract "radius" because distance is to the outside of the polygon (not the center)
                     sign * alpha * distanceToOutside * Math.sin(angle));
         }
+        */
 
         return new Vector(sign * alpha * sDistance * Math.cos(angle), sign * alpha * sDistance * Math.sin(angle));
 

@@ -6,6 +6,7 @@ import math.geom2d.Point2D;
 import potentialFields.PotentialField;
 import potentialFields.circular.AvoidObstacleTangentialCircularPF;
 import potentialFields.circular.SeekGoalCircularPF;
+import potentialFields.random.RandomPotentialField;
 import potentialFields.rectangular.AvoidObstacleRectangularPF;
 import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 
@@ -50,7 +51,7 @@ public class PFAgent {
         mServer.handshake();
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
-        mPdAngVelController = new PDAngVelController(50, 50);
+        mPdAngVelController = new PDAngVelController(70, 100);
         mOpponentColor = Tank.TeamColor.PURPLE;
     }
 
@@ -59,6 +60,7 @@ public class PFAgent {
      */
     private void buildObstaclePotentialFields() throws IOException {
         mPotentialFields = new ArrayList<PotentialField>();
+        mPotentialFields.add(new RandomPotentialField(5));
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
             AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .35);
@@ -89,12 +91,12 @@ public class PFAgent {
             }
 
             Point2D pos = myTank.getPos();
-            tankPfs.add(new AvoidObstacleTangentialCircularPF(4.32, pos, 3.0, GeometryUtils.shouldBeClockwise(pos), .5));
+            tankPfs.add(new AvoidObstacleTangentialCircularPF(5.32, pos, 3.0, GeometryUtils.shouldBeClockwise(pos), 1));
         }
 
         for(Tank otherTank : otherTanks) {
             Point2D pos = otherTank.getPos();
-            tankPfs.add(new AvoidObstacleTangentialCircularPF(4.32, pos, 3.0, GeometryUtils.shouldBeClockwise(pos), .5));
+            tankPfs.add(new AvoidObstacleTangentialCircularPF(4.32, pos, 3.0, GeometryUtils.shouldBeClockwise(pos), 1));
         }
 
 
@@ -136,13 +138,13 @@ public class PFAgent {
         if(goalColor == mTeamColor) {
             Map<Tank.TeamColor, Base> bases = mServer.getBases();
             Point2D myBaseCentroid = Point2D.centroid(bases.get(mTeamColor).getCorners());
-            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .3));
+            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .4));
         }
         else {
             ArrayList<Flag> flags = mServer.getFlags();
             for(Flag flag : flags) {
                 if(flag.getTeamColor() == goalColor) {
-                    mFlagPf.set(0, new SeekGoalCircularPF(.1, flag.getPos(), 100, .3));
+                    mFlagPf.set(0, new SeekGoalCircularPF(.1, flag.getPos(), 100, .4));
                     break;
                 }
             }

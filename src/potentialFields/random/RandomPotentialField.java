@@ -23,7 +23,7 @@ public class RandomPotentialField extends PotentialField {
 
     @Override
     public Vector getVectorForce(Point2D location) {
-        return new Vector(alpha * gen.nextDouble(), alpha * gen.nextDouble());
+        return new Vector(alpha * (gen.nextDouble() - .5), alpha * (gen.nextDouble() - .5));
     }
 
     @Override

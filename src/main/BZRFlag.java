@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = true;
+    private boolean mDebug = false;
 
     /**
      * Constructor
@@ -412,7 +412,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 50317);
+        BZRFlag blueServer = new BZRFlag("localhost", 53940);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
            pfAgent.tick();
