@@ -29,6 +29,8 @@ public class PFAgent {
     private double mPrevTime;
     /**My team color*/
     private Tank.TeamColor mTeamColor;
+    /**Oponent color*/
+    private Tank.TeamColor mOpponentColor;
     /**Potential fields in the world*/
     private List<PotentialField> mPotentialFields;
     /**PF for flag*/
@@ -49,16 +51,7 @@ public class PFAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         mPdAngVelController = new PDAngVelController(50, 50);
-
-        ArrayList<Flag> flags = mServer.getFlags();
-        for(Flag flag : flags) {
-            if(flag.getTeamColor() != myTeamColor) {
-                mFlagPf.add(new SeekGoalCircularPF(.1, flag.getPos(), 100, .3));
-                break;
-            }
-        }
-
-        buildObstaclePotentialFields();
+        mOpponentColor = Tank.TeamColor.PURPLE;
     }
 
     /**
@@ -134,9 +127,31 @@ public class PFAgent {
     }
 
     /**
+     * Builds the goal potential field
+     */
+    public void buildGoalPotentialField(Tank.TeamColor goalColor) throws IOException {
+        if(mFlagPf.isEmpty())
+            mFlagPf.add(null);
+
+        if(goalColor == mTeamColor) {
+            Map<Tank.TeamColor, Base> bases = mServer.getBases();
+            Point2D myBaseCentroid = Point2D.centroid(bases.get(mTeamColor).getCorners());
+            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .3));
+        }
+        else {
+            ArrayList<Flag> flags = mServer.getFlags();
+            for(Flag flag : flags) {
+                if(flag.getTeamColor() == goalColor) {
+                    mFlagPf.set(0, new SeekGoalCircularPF(.1, flag.getPos(), 100, .3));
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Some time has passed; decide what to do.
      */
-    public boolean prevCaptureStatus = false;
     public void tick() throws IOException {
         //must be done each time because tanks may have moved
         double newTime = System.currentTimeMillis();
@@ -149,14 +164,11 @@ public class PFAgent {
         MyTank pfTank0 = myTanks.get(pfTankIndex);
 
         boolean capturedFlag = pfTank0.getFlagColor() != Tank.TeamColor.NONE;
-        if(prevCaptureStatus != capturedFlag) {
-            Map<Tank.TeamColor, Base> bases = mServer.getBases();
-            Point2D myBaseCentroid = Point2D.centroid(bases.get(mTeamColor).getCorners());
-            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .3));
-            buildObstaclePotentialFields();
-            //plotPfs();
-            prevCaptureStatus = capturedFlag;
-        }
+        if(capturedFlag)
+            buildGoalPotentialField(mTeamColor);
+        else
+            buildGoalPotentialField(mOpponentColor);
+        buildObstaclePotentialFields();
 
         // get the goal angle
         double currAng = pfTank0.getAngle();

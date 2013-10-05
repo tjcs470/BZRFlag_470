@@ -22,7 +22,8 @@ public class PDAngVelController {
     }
 
     public double getAcceleration(double goalAng, double currAng, double timeDiff){
-        assert(timeDiff > 0.0);
+        if(timeDiff <= 0.0)
+            timeDiff = .000001;
         double error = goalAng - currAng;
         double errorDeriv = (error - mPrevError) / timeDiff;
         mPrevError = error;

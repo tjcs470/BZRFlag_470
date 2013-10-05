@@ -162,7 +162,7 @@ public class BZRFlag {
         ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
         Pattern obstacleLine = Pattern.compile(
-                "obstacle (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?) (-?[0-9]+\\.[0-9]?)"
+                "obstacle (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
         );
         Matcher matcher = null;
         String arrayLine = readOneReplyLine();
@@ -370,7 +370,7 @@ public class BZRFlag {
     }
 
     public static void plotWorld() throws IOException {
-        BZRFlag agent = new BZRFlag("localhost", 33925);
+        BZRFlag agent = new BZRFlag("localhost", 39248);
         agent.handshake();
         ArrayList<Obstacle> obstacles = agent.getObstacles();
 
@@ -412,7 +412,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 42912);
+        BZRFlag blueServer = new BZRFlag("localhost", 50317);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
            pfAgent.tick();
