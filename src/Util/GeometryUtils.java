@@ -7,7 +7,6 @@ import math.geom2d.Point2D;
  * User: ty
  * Date: 10/3/13
  * Time: 11:38 AM
- * To change this template use File | Settings | File Templates.
  */
 public class GeometryUtils {
     /**
@@ -23,6 +22,12 @@ public class GeometryUtils {
         }
 
         return quadrantNum;
+    }
+
+    public static boolean shouldBeClockwise(Point2D p) {
+        int quadrant = getQuadrant(p);
+        return quadrant == 2 || quadrant == 4;
+
     }
 
     /**

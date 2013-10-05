@@ -7,7 +7,6 @@ import Util.GeometryUtils;
  * User: ty
  * Date: 10/2/13
  * Time: 6:23 PM
- * To change this template use File | Settings | File Templates.
  */
 public class PDAngVelController {
     /**Error coeff*/
@@ -24,10 +23,9 @@ public class PDAngVelController {
 
     public double getAcceleration(double goalAng, double currAng, double timeDiff){
         assert(timeDiff > 0.0);
-        double error = GeometryUtils.angDiff(goalAng, currAng);
+        double error = goalAng - currAng;
         double errorDeriv = (error - mPrevError) / timeDiff;
         mPrevError = error;
-        double acceleration = mKP * error + mKD * errorDeriv;
-        return acceleration;
+        return mKP * error + mKD * errorDeriv;
     }
 }

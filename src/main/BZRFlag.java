@@ -249,7 +249,7 @@ public class BZRFlag {
             Tank.TankStatus status = Tank.TankStatus.valueOf(matcher.group(3).toUpperCase());
             int shotsAvail = Integer.parseInt(matcher.group(4));
             double timeToReload = parseDouble(matcher.group(5));
-            Tank.TeamColor flagColor = matcher.group(6).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(4).toUpperCase());
+            Tank.TeamColor flagColor = matcher.group(6).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(6).toUpperCase());
             double xPos = parseDouble(matcher.group(7));
             double yPos = parseDouble(matcher.group(8));
             Vector tankPos = new Vector(xPos, yPos);
@@ -351,12 +351,12 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 58772);
+        BZRFlag blueServer = new BZRFlag("localhost", 48480);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
            pfAgent.tick();
         }
-        //pfAgent.plotPfs();
+//        pfAgent.plotPfs();
 
         /*DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {

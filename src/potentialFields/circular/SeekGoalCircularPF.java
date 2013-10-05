@@ -24,7 +24,6 @@ public class SeekGoalCircularPF extends CircularPotentialField {
             return emptyVector();
         }
 
-        double distanceToCenter = getDistanceToCenterOfPotentialField(location);
         double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
         double angle = getAngleToPotentialField(location);
         if(distanceToOutside < sDistance) {

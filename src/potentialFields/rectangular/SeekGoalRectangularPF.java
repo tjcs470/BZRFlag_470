@@ -27,7 +27,6 @@ public class SeekGoalRectangularPF extends RectangularPotentialField {
             return emptyVector();
         }
 
-        double distanceToCenter = getDistanceToCenterOfPotentialField(location);
         double distanceToOutside = getDistanceToOutsideOfPotentialField(location);
         double angle = getAngleToPotentialField(location);
         if(distanceToOutside < sDistance) {

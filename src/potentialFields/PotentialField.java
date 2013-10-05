@@ -23,6 +23,7 @@ public abstract class PotentialField {
     }
 
     public abstract Vector getVectorForce(Point2D location);
+    public abstract Point2D getCenter();
     public abstract boolean isPointOnPotentialField(Point2D location);
     public abstract double getDistanceToOutsideOfPotentialField(Point2D location);
     public abstract double getDistanceToCenterOfPotentialField(Point2D location);
@@ -36,22 +37,22 @@ public abstract class PotentialField {
         return new Vector(0.0, 0.0);
     }
 
-    public static double getNetAngle(Point2D location, List<PotentialField> fields, PotentialField... others) {
-        return getNetVector(location, fields, others).getAngle();
+    public static double getNetAngle(Point2D location, List<PotentialField>... fields) {
+        return getNetVector(location, fields).getAngle();
     }
 
-    public static Vector getNetVector(Point2D location, List<PotentialField> fields, PotentialField... others) {
+    public static Vector getNetVector(Point2D location, List<PotentialField>... fieldLists) {
         assert location != null;
         List<Vector> vectors = new ArrayList<Vector>();
-        for(PotentialField field : fields) {
-            if(field == null) continue;
-            Vector add = field.getVectorForce(location);
-            vectors.add(add);
-        }
-        for(PotentialField field : others) {
-            if(field == null) continue;
-            Vector add = field.getVectorForce(location);
-            vectors.add(add);
+        for(List<PotentialField> fieldList : fieldLists) {
+            for(PotentialField field : fieldList) {
+                if (field == null) {
+                    System.out.println("WARNING: Potential Field was NULL");
+                    continue;
+                }
+                Vector add = field.getVectorForce(location);
+                vectors.add(add);
+            }
         }
         return sumVectors(vectors);
     }

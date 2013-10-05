@@ -45,5 +45,10 @@ public abstract class RectangularPotentialField extends PotentialField {
     public boolean isPointOnPotentialField(Point2D point) {
         return polygon.contains(point);
     }
+
+    @Override
+    public Point2D getCenter() {
+        return polygon.centroid();
+    }
 }
 

@@ -45,4 +45,9 @@ public class RandomPotentialField extends PotentialField {
     public double getAngleToPotentialField(Point2D location) {
         return gen.nextDouble() * 2 * Math.PI;
     }
+
+    @Override
+    public Point2D getCenter() {
+        return emptyVector();
+    }
 }

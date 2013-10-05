@@ -1,8 +1,10 @@
 package main;
 
 import ServerResponse.*;
+import Util.GeometryUtils;
 import math.geom2d.Point2D;
 import potentialFields.PotentialField;
+import potentialFields.circular.AvoidObstacleTangentialCircularPF;
 import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.AvoidObstacleRectangularPF;
 import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
@@ -10,13 +12,13 @@ import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
  * User: ty
  * Date: 10/2/13
  * Time: 6:32 PM
- * To change this template use File | Settings | File Templates.
  */
 public class PFAgent {
 
@@ -27,11 +29,14 @@ public class PFAgent {
     /**My team color*/
     private Tank.TeamColor mTeamColor;
     /**Potential fields in the world*/
-    private ArrayList<PotentialField> mPotentialFields;
+    private List<PotentialField> mPotentialFields;
     /**PF for flag*/
-    private SeekGoalCircularPF mFlagPf;
+    // should only have one potential field at any time, made into list for paramater passing in Potential Field class
+    private List<PotentialField> mFlagPf = new ArrayList<PotentialField>(1);
+    private List<PotentialField> tankPfs = new ArrayList<PotentialField>(30);
     /**PD Controller for angles*/
     PDAngVelController mPdAngVelController;
+
 
     /**
      * Constructor
@@ -42,7 +47,7 @@ public class PFAgent {
         mServer.handshake();
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
-        mPdAngVelController = new PDAngVelController(2, .5);
+        mPdAngVelController = new PDAngVelController(50, 50);
         buildPotentialFields(myTeamColor);
         plotPfs();
     }
@@ -54,7 +59,7 @@ public class PFAgent {
         ArrayList<Flag> flags = mServer.getFlags();
         for(Flag flag : flags) {
             if(flag.getTeamColor() != myTeamColor) {
-                mFlagPf = new SeekGoalCircularPF(.1, flag.getPos(), 100, .3);
+                mFlagPf.add(new SeekGoalCircularPF(.1, flag.getPos(), 100, .3));
                 break;
             }
         }
@@ -67,8 +72,8 @@ public class PFAgent {
 
             // calculate the relationship of obstacle center to the goal
             Point2D obsCentroid = Point2D.centroid(obstacle.getPoints());
-            Point2D goalToCentroid = new Point2D(new Point2D(obsCentroid.x() - mFlagPf.getCenter().x(),
-                    obsCentroid.y() - mFlagPf.getCenter().y()));
+            Point2D goalToCentroid = new Point2D(new Point2D(obsCentroid.x() - mFlagPf.get(0).getCenter().x(),
+                    obsCentroid.y() - mFlagPf.get(0).getCenter().y()));
             int quadrant = Util.GeometryUtils.getQuadrant(goalToCentroid);
             boolean clockwise = true;
             if(quadrant == 1 || quadrant == 3)
@@ -76,7 +81,30 @@ public class PFAgent {
 
             AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 120, clockwise, .15);
             mPotentialFields.add(tangRectPf);
+            buildTankPotentialFields(1);
         }
+    }
+
+    private void buildTankPotentialFields(int currTank) throws IOException {
+        tankPfs.clear();
+        ArrayList<MyTank> myTanks = mServer.getMyTanks(mTeamColor);
+        ArrayList<Tank> otherTanks = mServer.getOtherTanks();
+
+        for(MyTank myTank : myTanks) {
+            if(myTank.getIndex() == currTank) {
+                continue;
+            }
+
+            Point2D pos = myTank.getPos();
+            tankPfs.add(new AvoidObstacleTangentialCircularPF(4.32, pos, 3.0, GeometryUtils.shouldBeClockwise(pos), .5));
+        }
+
+        for(Tank otherTank : otherTanks) {
+            Point2D pos = otherTank.getPos();
+            tankPfs.add(new AvoidObstacleTangentialCircularPF(4.32, pos, 3.0, GeometryUtils.shouldBeClockwise(pos), .5));
+        }
+
+
     }
 
     public void plotPfs() throws IOException {
@@ -93,15 +121,14 @@ public class PFAgent {
 
         gpiFile.println("plot '-' with vectors head");
 
-        mPotentialFields.add(mFlagPf);
-        for(double x = -400; x <= 400; x += 50.0) {
-            for(double y = -400; y <= 400; y += 50.0) {
+        for(double x = -400; x <= 400; x += 3.0) {
+            for(double y = -400; y <= 400; y += 3.0) {
                 Vector pos = new Vector(x, y);
-                Vector force = PotentialField.getNetVector(pos, mPotentialFields);
+//                Vector force = PotentialField.getNetVector(pos, mPotentialFields, mFlagPf, tankPfs);
+                Vector force = PotentialField.getNetVector(pos, tankPfs);
                 gpiFile.println(String.format("%s %s %s %s", x, y, force.x(), force.y()));
             }
         }
-        mPotentialFields.remove(mFlagPf);
 
         gpiFile.println("e");
         gpiFile.close();
@@ -111,18 +138,21 @@ public class PFAgent {
      * Some time has passed; decide what to do.
      */
     public void tick() throws IOException {
+        //must be done each time because tanks may have moved
         double newTime = System.currentTimeMillis();
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
 
         ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
         int pfTankIndex = 1;
+        buildTankPotentialFields(pfTankIndex);
         MyTank pfTank0 = myTanks.get(pfTankIndex);
 
         // get the goal angle
         double currAng = pfTank0.getAngle();
         double currAngVel = pfTank0.getAngVel();
-        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields, mFlagPf);
+        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields, mFlagPf, tankPfs);
+//        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), tankPfs);
 
         double angAcceleration = mPdAngVelController.getAcceleration(goalAngle, currAng, timeDiffInSec);
         double targetVel = currAngVel + angAcceleration;

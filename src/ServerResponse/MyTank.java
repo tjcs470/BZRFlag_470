@@ -7,7 +7,6 @@ import main.Vector;
  * User: ty
  * Date: 9/28/13
  * Time: 9:58 AM
- * To change this template use File | Settings | File Templates.
  */
 public class MyTank extends Tank {
     /**Tank index*/
@@ -33,6 +32,11 @@ public class MyTank extends Tank {
                   Vector vel,
                   double angVel) {
         super(callSign, color, status, flagColor, pos, angle);
+        this.mIndex = index;
+        this.mShotsLeft = mShotsLeft;
+        this.mTimeToReload = timeToReload;
+        this.mVel = vel;
+        this.mAngVel = angVel;
     }
 
     public int getIndex() {
