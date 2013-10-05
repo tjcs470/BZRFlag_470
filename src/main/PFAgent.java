@@ -10,6 +10,8 @@ import potentialFields.rectangular.AvoidObstacleTangentialRectangularPF;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,14 +45,7 @@ public class PFAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         mPdAngVelController = new PDAngVelController(2, .5);
-        buildPotentialFields(myTeamColor);
-        plotPfs();
-    }
 
-    /**
-     * Builds up the potential fields
-     */
-    private void buildPotentialFields(Tank.TeamColor myTeamColor) throws IOException {
         ArrayList<Flag> flags = mServer.getFlags();
         for(Flag flag : flags) {
             if(flag.getTeamColor() != myTeamColor) {
@@ -58,7 +53,15 @@ public class PFAgent {
                 break;
             }
         }
+        buildPotentialFields(myTeamColor);
 
+        plotPfs();
+    }
+
+    /**
+     * Builds up the potential fields
+     */
+    private void buildPotentialFields(Tank.TeamColor myTeamColor) throws IOException {
         mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
@@ -118,6 +121,14 @@ public class PFAgent {
         ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
         int pfTankIndex = 1;
         MyTank pfTank0 = myTanks.get(pfTankIndex);
+
+        boolean capturedFlag = pfTank0.getFlagColor() != Tank.TeamColor.NONE;
+        if(capturedFlag) {
+            Map<Tank.TeamColor, Base> bases = mServer.getBases();
+            Point2D myBaseCentroid = Point2D.centroid(bases.get(mTeamColor).getCorners());
+            mFlagPf = new SeekGoalCircularPF(.1, myBaseCentroid, 100, .3);
+            buildPotentialFields(mTeamColor);
+        }
 
         // get the goal angle
         double currAng = pfTank0.getAngle();

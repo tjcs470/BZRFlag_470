@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = false;
+    private boolean mDebug = true;
 
     /**
      * Constructor
@@ -277,6 +279,65 @@ public class BZRFlag {
         return myTanks;
     }
 
+
+    /**
+     * Reads an array of lines
+     */
+    private ArrayList<String> readArrayResponse() throws IOException {
+        String arrayLine = readOneReplyLine();
+        assert(arrayLine.equals("begin"));
+
+        ArrayList<String> arrayLines = new ArrayList<String>();
+        while(true) {
+            arrayLine = readOneReplyLine();
+            if(arrayLine.equals("end"))
+                break;
+            else
+                arrayLines.add(arrayLine);
+        }
+
+        return arrayLines;
+    }
+
+    /**
+     * Queries the bases on the map
+     * @throws IOException
+     */
+    public Map<Tank.TeamColor, Base> getBases() throws IOException {
+        String queryCmd = "bases";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+        ArrayList<String> basesResponseLines = readArrayResponse();
+
+        Pattern baseLinePattern = Pattern.compile(
+                "base (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
+        );
+        Matcher matcher = null;
+
+        HashMap<Tank.TeamColor, Base> bases = new HashMap<Tank.TeamColor, Base>();
+        for(String baseLine : basesResponseLines) {
+            matcher = baseLinePattern.matcher(baseLine);
+            assert(matcher.matches());
+
+            Tank.TeamColor baseColor = Tank.TeamColor.valueOf(matcher.group(1).toUpperCase());
+
+            Vector p0 = new Vector(parseDouble(matcher.group(2)), parseDouble(matcher.group(3)));
+            Vector p1 = new Vector(parseDouble(matcher.group(4)), parseDouble(matcher.group(5)));
+            Vector p2 = new Vector(parseDouble(matcher.group(6)), parseDouble(matcher.group(7)));
+            Vector p3 = new Vector(parseDouble(matcher.group(8)), parseDouble(matcher.group(9)));
+
+            Base base = new Base(p0, p1, p2, p3);
+            bases.put(baseColor, base);
+        }
+
+        return bases;
+    }
+
+    /**
+     * Queries falg location on the map
+     * @return
+     * @throws IOException
+     */
     public ArrayList<Flag> getFlags() throws IOException {
         String queryCmd = "flags";
         sendLine(queryCmd);
@@ -351,7 +412,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 58772);
+        BZRFlag blueServer = new BZRFlag("localhost", 42236);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
            pfAgent.tick();
