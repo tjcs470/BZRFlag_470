@@ -43,6 +43,9 @@ public class Obstacle {
         return mP3;
     }
 
+    /**
+     * Getter for the corners of the obstacle in counter-clockwise order
+     */
     public List<Point2D> getPoints() {
         Point2D[] points = {mP3, mP2, mP1, mP0};
         return Arrays.asList(points);

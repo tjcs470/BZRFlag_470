@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,14 +49,7 @@ public class PFAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         mPdAngVelController = new PDAngVelController(50, 50);
-        buildPotentialFields(myTeamColor);
-        plotPfs();
-    }
 
-    /**
-     * Builds up the potential fields
-     */
-    private void buildPotentialFields(Tank.TeamColor myTeamColor) throws IOException {
         ArrayList<Flag> flags = mServer.getFlags();
         for(Flag flag : flags) {
             if(flag.getTeamColor() != myTeamColor) {
@@ -64,6 +58,13 @@ public class PFAgent {
             }
         }
 
+        buildObstaclePotentialFields();
+    }
+
+    /**
+     * Builds up the potential fields
+     */
+    private void buildObstaclePotentialFields() throws IOException {
         mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
@@ -81,7 +82,6 @@ public class PFAgent {
 
             AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 120, clockwise, .15);
             mPotentialFields.add(tangRectPf);
-            buildTankPotentialFields(1);
         }
     }
 
@@ -121,11 +121,10 @@ public class PFAgent {
 
         gpiFile.println("plot '-' with vectors head");
 
-        for(double x = -400; x <= 400; x += 3.0) {
-            for(double y = -400; y <= 400; y += 3.0) {
+        for(double x = -400; x <= 400; x += 50.0) {
+            for(double y = -400; y <= 400; y += 50.0) {
                 Vector pos = new Vector(x, y);
-//                Vector force = PotentialField.getNetVector(pos, mPotentialFields, mFlagPf, tankPfs);
-                Vector force = PotentialField.getNetVector(pos, tankPfs);
+                Vector force = PotentialField.getNetVector(pos, mPotentialFields, mFlagPf, tankPfs);
                 gpiFile.println(String.format("%s %s %s %s", x, y, force.x(), force.y()));
             }
         }
@@ -137,6 +136,7 @@ public class PFAgent {
     /**
      * Some time has passed; decide what to do.
      */
+    public boolean prevCaptureStatus = false;
     public void tick() throws IOException {
         //must be done each time because tanks may have moved
         double newTime = System.currentTimeMillis();
@@ -144,9 +144,19 @@ public class PFAgent {
         mPrevTime = newTime;
 
         ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
-        int pfTankIndex = 1;
+        int pfTankIndex = 0;
         buildTankPotentialFields(pfTankIndex);
         MyTank pfTank0 = myTanks.get(pfTankIndex);
+
+        boolean capturedFlag = pfTank0.getFlagColor() != Tank.TeamColor.NONE;
+        if(prevCaptureStatus != capturedFlag) {
+            Map<Tank.TeamColor, Base> bases = mServer.getBases();
+            Point2D myBaseCentroid = Point2D.centroid(bases.get(mTeamColor).getCorners());
+            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .3));
+            buildObstaclePotentialFields();
+            //plotPfs();
+            prevCaptureStatus = capturedFlag;
+        }
 
         // get the goal angle
         double currAng = pfTank0.getAngle();
