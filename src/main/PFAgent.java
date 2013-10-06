@@ -51,7 +51,7 @@ public class PFAgent {
         mServer.handshake();
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
-        mPdAngVelController = new PDAngVelController(70, 100);
+        mPdAngVelController = new PDAngVelController(50, 50);
         mOpponentColor = Tank.TeamColor.PURPLE;
     }
 
@@ -60,7 +60,7 @@ public class PFAgent {
      */
     private void buildObstaclePotentialFields() throws IOException {
         mPotentialFields = new ArrayList<PotentialField>();
-        mPotentialFields.add(new RandomPotentialField(5));
+        mPotentialFields.add(new RandomPotentialField(12));
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
             AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .35);
@@ -138,13 +138,13 @@ public class PFAgent {
         if(goalColor == mTeamColor) {
             Map<Tank.TeamColor, Base> bases = mServer.getBases();
             Point2D myBaseCentroid = Point2D.centroid(bases.get(mTeamColor).getCorners());
-            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .4));
+            mFlagPf.set(0, new SeekGoalCircularPF(.1, myBaseCentroid, 100, .35));
         }
         else {
             ArrayList<Flag> flags = mServer.getFlags();
             for(Flag flag : flags) {
                 if(flag.getTeamColor() == goalColor) {
-                    mFlagPf.set(0, new SeekGoalCircularPF(.1, flag.getPos(), 100, .4));
+                    mFlagPf.set(0, new SeekGoalCircularPF(.1, flag.getPos(), 100, .35));
                     break;
                 }
             }

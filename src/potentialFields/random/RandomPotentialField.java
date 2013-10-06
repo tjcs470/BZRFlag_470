@@ -23,7 +23,21 @@ public class RandomPotentialField extends PotentialField {
 
     @Override
     public Vector getVectorForce(Point2D location) {
-        return new Vector(alpha * (gen.nextDouble() - .5), alpha * (gen.nextDouble() - .5));
+
+        double x1 = alpha * (gen.nextDouble() - .5);
+        double x2 = alpha * (gen.nextDouble() - .5);
+        double x3 = alpha * (gen.nextDouble() - .5);
+
+        double y1 = alpha * (gen.nextDouble() - .5);
+        double y2 = alpha * (gen.nextDouble() - .5);
+        double y3 = alpha * (gen.nextDouble() - .5);
+
+        //returns the min which allows for large alpha
+        return new Vector(min(x1, min(x2, x3)), min(y1, min(y2,y3)));
+    }
+
+    private double min(double d1, double d2) {
+        return d1 < d2 ? d1 : d2;
     }
 
     @Override
