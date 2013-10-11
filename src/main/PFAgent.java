@@ -38,7 +38,9 @@ public class PFAgent {
     private List<PotentialField> mFlagPf = new ArrayList<PotentialField>(1);
     private List<PotentialField> tankPfs = new ArrayList<PotentialField>(30);
     /**PD Controller for angles*/
-    PDAngVelController mPdAngVelController;
+    //PDAngVelController mPdAngVelController;
+    private List<PDAngVelController> mTankPdControllers;
+    private List<Double> mTimeDiffs = new ArrayList<Double>(10);
 
 
     /**
@@ -50,8 +52,15 @@ public class PFAgent {
         mServer.handshake();
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
-        mPdAngVelController = new PDAngVelController(50, 50);
+        //mPdAngVelController = new PDAngVelController(50, 50);
         mOpponentColor = Tank.TeamColor.PURPLE;
+
+        mTankPdControllers = new ArrayList<PDAngVelController>();
+        for(int i = 0; i < 10; i++) {
+            PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
+            mTankPdControllers.add(pdController);
+            mTimeDiffs.add(new Double(System.currentTimeMillis()));
+        }
     }
 
     /**
@@ -61,7 +70,7 @@ public class PFAgent {
         mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .35);
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .45);
             mPotentialFields.add(rectPF);
 
             // calculate the relationship of obstacle center to the goal
@@ -73,7 +82,7 @@ public class PFAgent {
             if(quadrant == 1 || quadrant == 3)
                 clockwise = false;
 
-            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 120, clockwise, .15);
+            AvoidObstacleTangentialRectangularPF tangRectPf = new AvoidObstacleTangentialRectangularPF(obstacle.getPoints(), 200, clockwise, .02);
             mPotentialFields.add(tangRectPf);
         }
     }
@@ -152,58 +161,42 @@ public class PFAgent {
     /**
      * Some time has passed; decide what to do.
      */
-    public void tick() throws IOException {
+    public void tick() throws IOException, InterruptedException {
         //must be done each time because tanks may have moved
-        double newTime = System.currentTimeMillis();
-        double timeDiffInSec = (newTime - mPrevTime) / 1000;
-        mPrevTime = newTime;
 
-        ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
-        int pfTankIndex = 0;
-        buildTankPotentialFields(pfTankIndex);
-        MyTank pfTank0 = myTanks.get(pfTankIndex);
+        //int pfTankIndex = 0;
+        for(int pfTankIndex = 0; pfTankIndex < 10; pfTankIndex++) {
+            ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
 
-        boolean capturedFlag = pfTank0.getFlagColor() != Tank.TeamColor.NONE;
-        if(capturedFlag)
-            buildGoalPotentialField(mTeamColor);
-        else
-            buildGoalPotentialField(mOpponentColor);
-        buildObstaclePotentialFields();
+            double newTime = System.currentTimeMillis();
+            double timeDiffInSec = (newTime - mTimeDiffs.get(pfTankIndex)) / 1000;
+            mTimeDiffs.set(pfTankIndex, newTime);
 
-        // get the goal angle
-        double currAng = pfTank0.getAngle();
-        double currAngVel = pfTank0.getAngVel();
-        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields, mFlagPf, tankPfs);
-//        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), tankPfs);
+            //buildTankPotentialFields(pfTankIndex);
+            MyTank pfTank0 = myTanks.get(pfTankIndex);
 
-        double angAcceleration = mPdAngVelController.getAcceleration(goalAngle, currAng, timeDiffInSec);
-        double targetVel = currAngVel + angAcceleration;
-        boolean needsNormalization = StrictMath.abs(targetVel) > 1.0;
-        if(needsNormalization)
-            targetVel = targetVel / StrictMath.abs(targetVel);
+            boolean capturedFlag = pfTank0.getFlagColor() != Tank.TeamColor.NONE;
+            if(capturedFlag)
+                buildGoalPotentialField(mTeamColor);
+            else
+                buildGoalPotentialField(mOpponentColor);
+            buildObstaclePotentialFields();
 
-        mServer.angVel(pfTankIndex, targetVel);
-        mServer.speed(pfTankIndex, 1.0);
-        mServer.shoot(pfTankIndex);
+            // get the goal angle
+            double currAng = pfTank0.getAngle();
+            double currAngVel = pfTank0.getAngVel();
+            double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), mPotentialFields, mFlagPf, tankPfs);
+    //        double goalAngle = PotentialField.getNetAngle(pfTank0.getPos(), tankPfs);
 
-        /*ArrayList<MyTank> myTanks = mServer.getMyTanks(Tank.TeamColor.BLUE);
-        double newTime = System.currentTimeMillis();
-        double timeDiffInSec = (newTime - mPrevTime) / 1000;
-        mPrevTime = newTime;
+            //mPdAngVelController.getAcceleration(goalAngle, currAng, timeDiffInSec);
+            double angAcceleration = mTankPdControllers.get(pfTankIndex).getAcceleration(goalAngle, currAng, timeDiffInSec);
+            double targetVel = currAngVel + angAcceleration;
 
-        dumbTank0.update(timeDiffInSec, myTanks.get(0).getAngle());
-
-        mServer.speed(0, dumbTank0.getVel());
-        mServer.angVel(0, dumbTank0.getAngVel());
-        if(dumbTank0.shouldShoot())
-            mServer.shoot(0);
-
-        dumbTank1.update(timeDiffInSec, myTanks.get(1).getAngle());
-
-        mServer.speed(1, dumbTank1.getVel());
-        mServer.angVel(1, dumbTank1.getAngVel());
-        if(dumbTank1.shouldShoot())
-            mServer.shoot(1);*/
-
+            if(pfTankIndex == 0)
+                System.out.println(angAcceleration);
+            mServer.angVel(pfTankIndex, targetVel);
+            mServer.speed(pfTankIndex, 1.0);
+            mServer.shoot(pfTankIndex);
+        }
     }
 }

@@ -27,6 +27,15 @@ public class PDAngVelController {
         double error = goalAng - currAng;
         double errorDeriv = (error - mPrevError) / timeDiff;
         mPrevError = error;
-        return mKP * error + mKD * errorDeriv;
+
+        double force = mKP * error + mKD * errorDeriv;
+
+        System.out.println("Goal angle: " + Double.toString(goalAng));
+        System.out.println("Current angle: " + Double.toString(currAng));
+        System.out.println("Error: " + Double.toString(error));
+        System.out.println("Error derivative: " + Double.toString(errorDeriv));
+        System.out.println("Force: " + Double.toString(force));
+
+        return force;
     }
 }

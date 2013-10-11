@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = true;
+    private boolean mDebug = false;
 
     /**
      * Constructor
@@ -154,6 +154,9 @@ public class BZRFlag {
      * @return
      * @throws IOException
      */
+    Pattern obstacleLine = Pattern.compile(
+            "obstacle (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
+    );
     public ArrayList<Obstacle> getObstacles() throws IOException {
         String queryCmd = "obstacles";
         sendLine(queryCmd);
@@ -161,9 +164,6 @@ public class BZRFlag {
 
         ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
-        Pattern obstacleLine = Pattern.compile(
-                "obstacle (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
-        );
         Matcher matcher = null;
         String arrayLine = readOneReplyLine();
         assert(arrayLine.equals("begin"));
@@ -189,6 +189,9 @@ public class BZRFlag {
      * Queries the other tanks within the world
      * @throws IOException
      */
+    private Pattern othertank = Pattern.compile(
+            "othertank (.*?[0-9]) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
+    );
     public ArrayList<Tank> getOtherTanks() throws IOException
     {
         String queryCmd = "othertanks";
@@ -197,16 +200,12 @@ public class BZRFlag {
 
         ArrayList<Tank> otherTanks = new ArrayList<Tank>();
 
-        Pattern obstacleLine = Pattern.compile(
-                "othertank (.*?[0-9]) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
-        );
-
         Matcher matcher = null;
         String arrayLine = readOneReplyLine();
         assert(arrayLine.equals("begin"));
         arrayLine = readOneReplyLine();
         while(!arrayLine.equals("end")) {
-            matcher = obstacleLine.matcher(arrayLine);
+            matcher = othertank.matcher(arrayLine);
             assert(matcher.matches());
 
             String callSign = matcher.group(1);
@@ -227,6 +226,9 @@ public class BZRFlag {
         return otherTanks;
     }
 
+    private Pattern tankLine = Pattern.compile(
+            "mytank ([0-9])\\s+(.*?[0-9])\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+ (.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)"
+    );
     public ArrayList<MyTank> getMyTanks(Tank.TeamColor myColor) throws IOException {
         String queryCmd = "mytanks";
         sendLine(queryCmd);
@@ -234,16 +236,12 @@ public class BZRFlag {
 
         ArrayList<MyTank> myTanks = new ArrayList<MyTank>();
 
-        Pattern obstacleLine = Pattern.compile(
-                "mytank ([0-9])\\s+(.*?[0-9])\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+ (.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)\\s+(.*?)"
-        );
-
         Matcher matcher = null;
         String arrayLine = readOneReplyLine();
         assert(arrayLine.equals("begin"));
         arrayLine = readOneReplyLine();
         while(!arrayLine.equals("end")) {
-            matcher = obstacleLine.matcher(arrayLine);
+            matcher = tankLine.matcher(arrayLine);
             assert(matcher.matches());
 
             int index = Integer.parseInt(matcher.group(1));
@@ -303,15 +301,15 @@ public class BZRFlag {
      * Queries the bases on the map
      * @throws IOException
      */
+    private Pattern baseLinePattern = Pattern.compile(
+            "base (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
+    );
     public Map<Tank.TeamColor, Base> getBases() throws IOException {
         String queryCmd = "bases";
         sendLine(queryCmd);
         readAck(queryCmd);
         ArrayList<String> basesResponseLines = readArrayResponse();
 
-        Pattern baseLinePattern = Pattern.compile(
-                "base (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?) (.*?)"
-        );
         Matcher matcher = null;
 
         HashMap<Tank.TeamColor, Base> bases = new HashMap<Tank.TeamColor, Base>();
@@ -338,14 +336,14 @@ public class BZRFlag {
      * @return
      * @throws IOException
      */
+    private Pattern flagLine = Pattern.compile(
+            "flag (.*?) (.*?) (.*?) (.*?)"
+    );
     public ArrayList<Flag> getFlags() throws IOException {
         String queryCmd = "flags";
         sendLine(queryCmd);
         readAck(queryCmd);
 
-        Pattern flagLine = Pattern.compile(
-                "flag (.*?) (.*?) (.*?) (.*?)"
-        );
 
         ArrayList<Flag> flags = new ArrayList<Flag>();
 
@@ -388,7 +386,7 @@ public class BZRFlag {
         gpiFile.close();
     }
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) throws IOException, InterruptedException {
         //plotWorld();
 
 
@@ -412,7 +410,7 @@ public class BZRFlag {
         agent.getOtherTanks();
         agent.getMyTanks(Tank.TeamColor.BLUE);*/
 
-        BZRFlag blueServer = new BZRFlag("localhost", 50317);
+        BZRFlag blueServer = new BZRFlag("localhost", 35236);
         PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
            pfAgent.tick();
