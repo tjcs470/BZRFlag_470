@@ -53,7 +53,7 @@ public class PFAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         //mPdAngVelController = new PDAngVelController(50, 50);
-        mOpponentColor = Tank.TeamColor.PURPLE;
+        mOpponentColor = Tank.TeamColor.GREEN;
 
         mTankPdControllers = new ArrayList<PDAngVelController>();
         for(int i = 0; i < 10; i++) {
@@ -70,7 +70,7 @@ public class PFAgent {
         mPotentialFields = new ArrayList<PotentialField>();
         ArrayList<Obstacle> obstacles = mServer.getObstacles();
         for(Obstacle obstacle : obstacles) {
-            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 100.0, .45);
+            AvoidObstacleRectangularPF rectPF = new AvoidObstacleRectangularPF(obstacle.getPoints(), 90.0, .45);
             mPotentialFields.add(rectPF);
 
             // calculate the relationship of obstacle center to the goal
@@ -159,6 +159,34 @@ public class PFAgent {
     }
 
     /**
+     * Returns the flag color for the closest opponent's flag
+     * @param tankPos
+     * @return
+     */
+    private void buildPfForClosestOpponentFlag(Point2D tankPos) throws IOException {
+        if(mFlagPf.isEmpty())
+            mFlagPf.add(null);
+
+        double closestDist = Double.MAX_VALUE;
+        Flag closestFlag = null;
+
+        ArrayList<Flag> flags = mServer.getFlags();
+        for(Flag flag : flags) {
+            if(flag.getTeamColor() == mTeamColor)
+                continue;
+
+            double distToFlag = tankPos.distance(flag.getPos());
+            if(distToFlag < closestDist) {
+                closestDist = distToFlag;
+                closestFlag = flag;
+            }
+        }
+
+        assert(closestFlag != null);
+        mFlagPf.set(0, new SeekGoalCircularPF(.1, closestFlag.getPos(), 100, .3));
+    }
+
+    /**
      * Some time has passed; decide what to do.
      */
     public void tick() throws IOException, InterruptedException {
@@ -172,14 +200,15 @@ public class PFAgent {
             double timeDiffInSec = (newTime - mTimeDiffs.get(pfTankIndex)) / 1000;
             mTimeDiffs.set(pfTankIndex, newTime);
 
-            //buildTankPotentialFields(pfTankIndex);
+            buildTankPotentialFields(pfTankIndex);
             MyTank pfTank0 = myTanks.get(pfTankIndex);
 
             boolean capturedFlag = pfTank0.getFlagColor() != Tank.TeamColor.NONE;
             if(capturedFlag)
                 buildGoalPotentialField(mTeamColor);
             else
-                buildGoalPotentialField(mOpponentColor);
+                //buildGoalPotentialField(mOpponentColor);
+                buildPfForClosestOpponentFlag(pfTank0.getPos());
             buildObstaclePotentialFields();
 
             // get the goal angle

@@ -387,40 +387,24 @@ public class BZRFlag {
     }
 
     public static void main(String args[]) throws IOException, InterruptedException {
-        //plotWorld();
-
-
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        /*System.out.print("Input host:");
-        String host = br.readLine();*/
 
-        /*System.out.print("Input port num:");
-        String portNumStr = br.readLine();
-        int portNum = Integer.parseInt(portNumStr);*/
+        //BZRFlag blueServer = new BZRFlag("localhost", 53257);
+        BZRFlag greenServer = new BZRFlag("localhost", 53302);
+        BZRFlag redServer = new BZRFlag("localhost", 54583);
 
-        //BZRFlag agent = new BZRFlag("localhost", portNum);
-        /*BZRFlag agent = new BZRFlag("localhost", 50271);
-        agent.sendLine("agent 1");
-        agent.readOneReplyLine();
+        //PFAgent pfAgentBlue = new PFAgent(blueServer, Tank.TeamColor.BLUE);
+        //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
+        //PFAgent pfAgentRed = new PFAgent(redServer, Tank.TeamColor.RED);
+        DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
+        DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
-        agent.shoot(1);
-        agent.speed(1, -1.0);
-        agent.angVel(1, 1.0);
-        agent.getObstacles();
-        agent.getOtherTanks();
-        agent.getMyTanks(Tank.TeamColor.BLUE);*/
-
-        BZRFlag blueServer = new BZRFlag("localhost", 35236);
-        PFAgent pfAgent = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         while(true) {
-           pfAgent.tick();
+           //pfAgentBlue.tick();
+           //pfAgentGreen.tick();
+           //pfAgentRed.tick();
+           dumbAgentGreen.tick();
+           dumbAgentRed.tick();
         }
-//        pfAgent.plotPfs();
-
-        /*DumbAgent dumbAgent = new DumbAgent(blueServer, Tank.TeamColor.BLUE);
-        while(true) {
-            dumbAgent.tick();
-        }*/
-
     }
 }
