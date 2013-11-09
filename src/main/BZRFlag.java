@@ -186,6 +186,44 @@ public class BZRFlag {
     }
 
     /**
+     * Queries the server for the world constants
+     */
+    private Pattern mServerConstPattern = Pattern.compile("constant (.*?) (.*?)");
+    public ServerConstants readConstants() throws IOException
+    {
+        String queryCmd = "constants";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+        ArrayList<String> constResponses = readArrayResponse();
+        Matcher matcher = null;
+
+        ServerConstants serverConstants = new ServerConstants();
+
+        final int TEAM = 0;
+        final int WORLD_SIZE = 1;
+        final int TRUE_POS = 16;
+        final int TRUE_NEG = 17;
+
+        matcher = mServerConstPattern.matcher(constResponses.get(TEAM));
+        assert(matcher.matches());
+        serverConstants.team = Tank.TeamColor.valueOf(matcher.group(2).toUpperCase());
+
+        matcher = mServerConstPattern.matcher(constResponses.get(WORLD_SIZE));
+        assert(matcher.matches());
+        serverConstants.worldSize = parseDouble(matcher.group(2).toUpperCase());
+
+        matcher = mServerConstPattern.matcher(constResponses.get(TRUE_POS));
+        assert(matcher.matches());
+        serverConstants.truePos= parseDouble(matcher.group(2).toUpperCase());
+
+        matcher = mServerConstPattern.matcher(constResponses.get(TRUE_NEG));
+        assert(matcher.matches());
+        serverConstants.trueNeg= parseDouble(matcher.group(2).toUpperCase());
+
+        return serverConstants;
+    }
+
+    /**
      * Queries the other tanks within the world
      * @throws IOException
      */
@@ -390,21 +428,24 @@ public class BZRFlag {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         //BZRFlag blueServer = new BZRFlag("localhost", 53257);
-        BZRFlag greenServer = new BZRFlag("localhost", 53302);
-        BZRFlag redServer = new BZRFlag("localhost", 54583);
+        BZRFlag greenServer = new BZRFlag("localhost", 45552);
+        //BZRFlag redServer = new BZRFlag("localhost", 54583);
+
+        greenServer.handshake();
+        ServerConstants constants = greenServer.readConstants();
 
         //PFAgent pfAgentBlue = new PFAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
         //PFAgent pfAgentRed = new PFAgent(redServer, Tank.TeamColor.RED);
-        DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
-        DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
+        //DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
+        //DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
-        while(true) {
+        //while(true) {
            //pfAgentBlue.tick();
            //pfAgentGreen.tick();
            //pfAgentRed.tick();
-           dumbAgentGreen.tick();
-           dumbAgentRed.tick();
-        }
+           //dumbAgentGreen.tick();
+           //dumbAgentRed.tick();
+        //}
     }
 }
