@@ -446,28 +446,85 @@ public class BZRFlag {
         gpiFile.close();
     }
 
-    public static void main(String args[]) throws IOException, InterruptedException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        //BZRFlag blueServer = new BZRFlag("localhost", 53257);
-        BZRFlag greenServer = new BZRFlag("localhost", 45552);
+    public ArrayList<NavigatorTank> getNavigatorTanks(Tank.TeamColor myColor) throws IOException{
+        double worldDimension = readConstants().worldSize;
+
+        String queryCmd = "mytanks";
+        sendLine(queryCmd);
+        readAck(queryCmd);
+
+
+        ArrayList<NavigatorTank> navTanks = new ArrayList<NavigatorTank>();
+
+
+        Matcher matcher = null;
+        String arrayLine = readOneReplyLine();
+        assert(arrayLine.equals("begin"));
+        arrayLine = readOneReplyLine();
+        while(!arrayLine.equals("end")) {
+            matcher = tankLine.matcher(arrayLine);
+            assert(matcher.matches());
+
+            int index = Integer.parseInt(matcher.group(1));
+            String callSign = matcher.group(2);
+            Tank.TankStatus status = Tank.TankStatus.valueOf(matcher.group(3).toUpperCase());
+            int shotsAvail = Integer.parseInt(matcher.group(4));
+            double timeToReload = parseDouble(matcher.group(5));
+            Tank.TeamColor flagColor = matcher.group(6).equals("-") ? Tank.TeamColor.NONE : Tank.TeamColor.valueOf(matcher.group(6).toUpperCase());
+            double xPos = parseDouble(matcher.group(7));
+            double yPos = parseDouble(matcher.group(8));
+            Vector tankPos = new Vector(xPos, yPos);
+            double angle = parseDouble(matcher.group(9));
+            double xVel = parseDouble(matcher.group(10));
+            double yVel = parseDouble(matcher.group(11));
+            Vector vel = new Vector(xVel, yVel);
+            double angVel = parseDouble(matcher.group(12));
+
+            NavigatorTank tank = new NavigatorTank(index,
+                    callSign,
+                    myColor,
+                    status, shotsAvail,
+                    timeToReload,
+                    flagColor,
+                    tankPos,
+                    angle,
+                    vel,
+                    angVel,
+                    worldDimension);
+            navTanks.add(tank);
+
+            arrayLine = readOneReplyLine();
+        }
+
+        return navTanks;
+    }
+
+
+
+    public static void main(String args[]) throws IOException, InterruptedException {
+//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        BZRFlag blueServer = new BZRFlag("localhost", 59132);
+//        BZRFlag greenServer = new BZRFlag("localhost", 45552);
         //BZRFlag redServer = new BZRFlag("localhost", 54583);
 
-        greenServer.handshake();
-        ServerConstants constants = greenServer.readConstants();
+//        greenServer.handshake();
+//        ServerConstants constants = greenServer.readConstants();
 
-        //PFAgent pfAgentBlue = new PFAgent(blueServer, Tank.TeamColor.BLUE);
+        NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
         //PFAgent pfAgentRed = new PFAgent(redServer, Tank.TeamColor.RED);
         //DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
         //DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
-        //while(true) {
+        while(true) {
+            navigatorAgent.tick();
            //pfAgentBlue.tick();
            //pfAgentGreen.tick();
            //pfAgentRed.tick();
            //dumbAgentGreen.tick();
            //dumbAgentRed.tick();
-        //}
+        }
     }
 }
