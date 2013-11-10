@@ -38,11 +38,11 @@ public class NavigatorAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         mTankPdControllers = new ArrayList<PDAngVelController>();
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 1; i++) {
             PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
-            tankGoalMap.put(i,0);
+            tankGoalMap.put(i,3);
         }
     }
 
@@ -51,6 +51,10 @@ public class NavigatorAgent {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
+
+            if(tankIndex > 0)
+                continue;
+
             if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
                 int goalNum = tankGoalMap.get(tankIndex);
