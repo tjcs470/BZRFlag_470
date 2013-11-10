@@ -36,7 +36,7 @@ public class NavigatorAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         mTankPdControllers = new ArrayList<PDAngVelController>();
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 1; i++) {
             PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());

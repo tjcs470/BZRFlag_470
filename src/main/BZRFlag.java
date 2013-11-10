@@ -224,6 +224,28 @@ public class BZRFlag {
     }
 
     /**
+     * Queries the server for occupancy
+     * @throws IOException
+     */
+    private Pattern locPattern = Pattern.compile(
+            "at (.*?), (.*?)"
+    );
+    private Pattern sizePatter = Pattern.compile(
+            "size (.*?)x(.*?)"
+    );
+    public void readOccGrid(int botId) throws IOException
+    {
+        String queryCmd = String.format("occgrid %d", botId);
+        sendLine(queryCmd);
+        readAck(queryCmd);
+        ArrayList<String> occGridLines = readArrayResponse();
+
+        Matcher matcher = null;
+        matcher = locPattern.matcher(occGridLines.get(0));
+        assert(matcher.matches());
+    }
+
+    /**
      * Queries the other tanks within the world
      * @throws IOException
      */
