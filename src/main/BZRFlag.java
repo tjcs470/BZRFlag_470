@@ -500,14 +500,32 @@ public class BZRFlag {
         return navTanks;
     }
 
+    private void sendAllTanksInMotion(Tank.TeamColor color) throws IOException {
+        for(MyTank tank : getMyTanks(color)) {
+            speed(tank.getIndex(), 1.0);
+            angVel(tank.getIndex(), .1);
+        }
+    }
 
 
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 59983);
-//        BZRFlag greenServer = new BZRFlag("localhost", 45552);
-        //BZRFlag redServer = new BZRFlag("localhost", 54583);
+        BZRFlag blueServer = new BZRFlag("localhost", 47321);
+
+
+//        BZRFlag purpleServer = new BZRFlag("localhost", 57785);
+//        purpleServer.handshake();
+//        purpleServer.sendAllTanksInMotion(Tank.TeamColor.PURPLE);
+//
+//        BZRFlag greenServer = new BZRFlag("localhost", 52360);
+//        greenServer.handshake();
+//        greenServer.sendAllTanksInMotion(Tank.TeamColor.GREEN);
+//
+//        BZRFlag redServer = new BZRFlag("localhost", 55179);
+//        redServer.handshake();
+//        redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
+
 
 //        greenServer.handshake();
 //        ServerConstants constants = greenServer.readConstants();
