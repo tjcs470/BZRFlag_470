@@ -25,7 +25,7 @@ public class PDAngVelController {
         if(timeDiff <= 0.0)
             timeDiff = .000001;
         double error = goalAng - currAng;
-        double errorDeriv = (error - mPrevError) / timeDiff;
+        double errorDeriv = (Math.abs(error) - Math.abs(mPrevError)) / timeDiff;
         mPrevError = error;
 
         double force = mKP * error + mKD * errorDeriv;

@@ -9,10 +9,7 @@ import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.SeekGoalRectangularPF;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,6 +26,7 @@ public class NavigatorAgent {
     private List<Double> mTimeDiffs = new ArrayList<Double>(10);
     private Map<Integer, Integer> tankGoalMap = new HashMap<Integer, Integer>(); //stores current goal of tank
     private Map<Integer, Point2D> tankPosMap = new HashMap<Integer, Point2D>(); //stores previous position of tank for stuck detection
+    Random gen = new Random();
 
     private List<NavigatorTank> army;
 
@@ -42,7 +40,7 @@ public class NavigatorAgent {
             PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
-            tankGoalMap.put(i,0);
+            tankGoalMap.put(i,3);
         }
     }
 
@@ -51,7 +49,11 @@ public class NavigatorAgent {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
-            if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
+
+            if(tankIndex > 0) continue;
+
+//            if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
+              if(tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
                 int goalNum = tankGoalMap.get(tankIndex);
                 goalNum++;
@@ -73,15 +75,19 @@ public class NavigatorAgent {
             double targetVel = currAngVel + angAcceleration;
 
             mServer.angVel(tankIndex, targetVel);
-            mServer.speed(tankIndex, 1);
-            mServer.shoot(tankIndex);
+            mServer.speed(tankIndex, .7);
+            if(gen.nextDouble() < .1)
+                mServer.shoot(tankIndex);
         }
 
     }
 
     private boolean isTankStuck(NavigatorTank tank) {
-        Point2D pos = tankPosMap.get(tank.getIndex());
-        return pos != null && pos.distance(tank.getPos()) < 2;
+        Point2D prevPos = tankPosMap.get(tank.getIndex());
+        Point2D currPos = tank.getPos();
+        tankPosMap.put(tank.getIndex(), currPos);
+
+        return prevPos != null && prevPos.distance(currPos) < .3;
     }
 
     private SeekGoalCircularPF getGoalForTank(NavigatorTank t) {
