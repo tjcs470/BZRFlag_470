@@ -228,12 +228,12 @@ public class BZRFlag {
      * @throws IOException
      */
     private Pattern locPattern = Pattern.compile(
-            "at (.*?), (.*?)"
+            "at (.*?),(.*?)"
     );
-    private Pattern sizePatter = Pattern.compile(
+    private Pattern sizePattern = Pattern.compile(
             "size (.*?)x(.*?)"
     );
-    public void readOccGrid(int botId) throws IOException
+    public OccGridResponse readOccGrid(int botId) throws IOException
     {
         String queryCmd = String.format("occgrid %d", botId);
         sendLine(queryCmd);
@@ -243,6 +243,26 @@ public class BZRFlag {
         Matcher matcher = null;
         matcher = locPattern.matcher(occGridLines.get(0));
         assert(matcher.matches());
+        int x = Integer.parseInt(matcher.group(1));
+        int y = Integer.parseInt(matcher.group(2));
+
+
+        matcher = sizePattern.matcher(occGridLines.get(1));
+        assert(matcher.matches());
+
+        int rows = Integer.parseInt(matcher.group(1));
+        int cols = Integer.parseInt(matcher.group(2));
+        OccGridResponse gridResponse = new OccGridResponse(x, y, rows, cols);
+
+        int row = 0;
+        for(int i = 2; i < occGridLines.size(); i++) {
+            String line = occGridLines.get(i);
+            for(int col = 0; col < cols; col++) {
+                gridResponse.occupiedObservation[row][col] = (line.charAt(col) == '0');
+            }
+        }
+
+        return gridResponse;
     }
 
     /**
@@ -505,26 +525,28 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 56248);
+        BZRFlag blueServer = new BZRFlag("localhost", 53730);
+        blueServer.handshake();
+        blueServer.readOccGrid(0);
 //        BZRFlag greenServer = new BZRFlag("localhost", 45552);
         //BZRFlag redServer = new BZRFlag("localhost", 54583);
 
 //        greenServer.handshake();
 //        ServerConstants constants = greenServer.readConstants();
 
-        NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
+        //NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
         //PFAgent pfAgentRed = new PFAgent(redServer, Tank.TeamColor.RED);
         //DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
         //DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
-        while(true) {
-            navigatorAgent.tick();
+        //while(true) {
+         //   navigatorAgent.tick();
            //pfAgentBlue.tick();
            //pfAgentGreen.tick();
            //pfAgentRed.tick();
            //dumbAgentGreen.tick();
            //dumbAgentRed.tick();
-        }
+        //}
     }
 }

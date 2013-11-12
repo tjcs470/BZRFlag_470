@@ -42,7 +42,7 @@ public class NavigatorAgent {
             PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
-            tankGoalMap.put(i,3);
+            tankGoalMap.put(i,1);
         }
     }
 
