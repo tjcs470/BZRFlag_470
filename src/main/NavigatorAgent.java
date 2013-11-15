@@ -1,8 +1,6 @@
 package main;
 
-import ServerResponse.MyTank;
-import ServerResponse.NavigatorTank;
-import ServerResponse.Tank;
+import ServerResponse.*;
 import math.geom2d.Point2D;
 import potentialFields.PotentialField;
 import potentialFields.circular.SeekGoalCircularPF;
@@ -29,6 +27,10 @@ public class NavigatorAgent {
     private List<Double> mTimeDiffs = new ArrayList<Double>(10);
     private Map<Integer, Integer> tankGoalMap = new HashMap<Integer, Integer>(); //stores current goal of tank
     private Map<Integer, Point2D> tankPosMap = new HashMap<Integer, Point2D>(); //stores previous position of tank for stuck detection
+    /**The probability map*/
+    private ProbabilityMap mProbabilityMap;
+    /**JFrame that renders the probability map*/
+    private Radar mRadar;
 
     private List<NavigatorTank> army;
 
@@ -44,6 +46,9 @@ public class NavigatorAgent {
             mTimeDiffs.add((double) System.currentTimeMillis());
             tankGoalMap.put(i,1);
         }
+        ServerConstants serverConstants = mServer.getConstants();
+        mProbabilityMap = new ProbabilityMap(serverConstants.worldSize);
+        mRadar = new Radar(mProbabilityMap);
     }
 
 
@@ -54,6 +59,14 @@ public class NavigatorAgent {
 
             if(tankIndex > 0)
                 continue;
+
+            OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
+            for(int row = 0; row < gridResponse.rows; row++) {
+                for(int col = 0; col < gridResponse.cols; col++) {
+                    mProbabilityMap.setProbability(gridResponse.x + col, gridResponse.y + row, 1);
+                }
+            }
+            System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
 
             if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));

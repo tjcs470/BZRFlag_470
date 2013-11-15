@@ -9,7 +9,7 @@ package ServerResponse;
  */
 public class ServerConstants {
     public Tank.TeamColor team;
-    public double worldSize;
+    public int worldSize;
     public double truePos;
     public double trueNeg;
 }

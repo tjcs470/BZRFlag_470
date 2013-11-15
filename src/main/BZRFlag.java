@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = false;
+    private boolean mDebug = true;
 
     /**
      * Constructor
@@ -189,7 +189,7 @@ public class BZRFlag {
      * Queries the server for the world constants
      */
     private Pattern mServerConstPattern = Pattern.compile("constant (.*?) (.*?)");
-    public ServerConstants readConstants() throws IOException
+    public ServerConstants getConstants() throws IOException
     {
         String queryCmd = "constants";
         sendLine(queryCmd);
@@ -210,7 +210,7 @@ public class BZRFlag {
 
         matcher = mServerConstPattern.matcher(constResponses.get(WORLD_SIZE));
         assert(matcher.matches());
-        serverConstants.worldSize = parseDouble(matcher.group(2).toUpperCase());
+        serverConstants.worldSize = Integer.parseInt(matcher.group(2).toUpperCase());
 
         matcher = mServerConstPattern.matcher(constResponses.get(TRUE_POS));
         assert(matcher.matches());
@@ -239,6 +239,7 @@ public class BZRFlag {
         sendLine(queryCmd);
         readAck(queryCmd);
         ArrayList<String> occGridLines = readArrayResponse();
+        System.out.println(occGridLines);
 
         Matcher matcher = null;
         matcher = locPattern.matcher(occGridLines.get(0));
@@ -468,7 +469,7 @@ public class BZRFlag {
 
 
     public ArrayList<NavigatorTank> getNavigatorTanks(Tank.TeamColor myColor) throws IOException{
-        double worldDimension = readConstants().worldSize;
+        double worldDimension = getConstants().worldSize;
 
         String queryCmd = "mytanks";
         sendLine(queryCmd);
@@ -525,28 +526,37 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 53730);
-        blueServer.handshake();
-        blueServer.readOccGrid(0);
-//        BZRFlag greenServer = new BZRFlag("localhost", 45552);
+        BZRFlag blueServer = new BZRFlag("localhost", 39135);
+        /*blueServer.handshake();
+        blueServer.readOccGrid(0);*/
+
+        /*ProbabilityMap probabilityMap = new ProbabilityMap(600);
+        Radar radar = new Radar(probabilityMap);*/
+
+        /*while(true) {
+            radar.repaint();
+            probabilityMap.setProbability(300, 300, 0.75f);
+        }*/
+
+        //BZRFlag greenServer = new BZRFlag("localhost", 45552);
         //BZRFlag redServer = new BZRFlag("localhost", 54583);
 
 //        greenServer.handshake();
 //        ServerConstants constants = greenServer.readConstants();
 
-        //NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
+        NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
         //PFAgent pfAgentRed = new PFAgent(redServer, Tank.TeamColor.RED);
         //DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
         //DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
-        //while(true) {
-         //   navigatorAgent.tick();
+        while(true) {
+           navigatorAgent.tick();
            //pfAgentBlue.tick();
            //pfAgentGreen.tick();
            //pfAgentRed.tick();
            //dumbAgentGreen.tick();
            //dumbAgentRed.tick();
-        //}
+        }
     }
 }

@@ -24,12 +24,12 @@ public class GridFilter {
     /**
      * Constructor
      */
-    public GridFilter(int gridSize, double initProb, double truePos, double trueNeg) {
+    public GridFilter(int worldSize, double initProb, double truePos, double trueNeg) {
         assert(initProb > 0 && initProb <= 1.0);
 
-        mGridSize = gridSize;
+        mGridSize = worldSize;
 
-        mProbOccupied = new double [gridSize][gridSize];
+        mProbOccupied = new double [worldSize][worldSize];
         for(int i = 0; i < mGridSize; i++)
             for(int j = 0; j < mGridSize; j++)
                 mProbOccupied[i][j] = initProb;

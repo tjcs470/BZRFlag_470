@@ -10,10 +10,14 @@ import java.awt.geom.Point2D;
  * To change this template use File | Settings | File Templates.
  */
 public class OccGridResponse {
-    /** y location of the grid */
+    /** x location of the grid */
     public int x;
     /** y location of the grid */
     public int y;
+    /** rows in the grid */
+    public int rows;
+    /** cols in the grid */
+    public int cols;
     /**Actual reading */
     public boolean [][] occupiedObservation;
 
@@ -23,6 +27,8 @@ public class OccGridResponse {
     public OccGridResponse(int x, int y, int rows, int cols) {
         this.x = x;
         this.y = y;
+        this.rows = rows;
+        this.cols = cols;
         occupiedObservation = new boolean [rows][cols];
     }
 }
