@@ -47,7 +47,7 @@ public class NavigatorAgent {
             tankGoalMap.put(i,1);
         }
         ServerConstants serverConstants = mServer.getConstants();
-        mProbabilityMap = new ProbabilityMap(serverConstants.worldSize);
+        mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
         mRadar = new Radar(mProbabilityMap);
     }
 
@@ -63,10 +63,11 @@ public class NavigatorAgent {
             OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
             for(int row = 0; row < gridResponse.rows; row++) {
                 for(int col = 0; col < gridResponse.cols; col++) {
-                    if(gridResponse.occupiedObservation[row][col])
-                        mProbabilityMap.setProbability(gridResponse.x + row, gridResponse.y + col, 1);
+                    mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, gridResponse.occupiedObservation[row][col]);
+                    /*if(gridResponse.occupiedObservation[row][col])
+                        mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, 1);
                     else
-                        mProbabilityMap.setProbability(gridResponse.x + row, gridResponse.y + col, .75f);
+                        mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, .75f);*/
                 }
             }
             System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);

@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = true;
+    private boolean mDebug = false;
 
     /**
      * Constructor
@@ -527,7 +527,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 59636);
+        BZRFlag blueServer = new BZRFlag("localhost", 59467);
         /*blueServer.handshake();
         blueServer.readOccGrid(0);*/
 
