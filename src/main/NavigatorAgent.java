@@ -63,7 +63,10 @@ public class NavigatorAgent {
             OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
             for(int row = 0; row < gridResponse.rows; row++) {
                 for(int col = 0; col < gridResponse.cols; col++) {
-                    mProbabilityMap.setProbability(gridResponse.x + col, gridResponse.y + row, 1);
+                    if(gridResponse.occupiedObservation[row][col])
+                        mProbabilityMap.setProbability(gridResponse.x + row, gridResponse.y + col, 1);
+                    else
+                        mProbabilityMap.setProbability(gridResponse.x + col, gridResponse.y + row, .75f);
                 }
             }
             System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);

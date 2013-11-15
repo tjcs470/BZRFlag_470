@@ -21,23 +21,31 @@ public class ProbabilityMap extends JPanel {
     /** World size */
     private int mWorldSize;
     private BufferedImage mRaster;
+    private final Object lock = new Object();
 
     public ProbabilityMap(int worldSize) {
         mWorldSize = worldSize;
         mImageXOrig = mWorldSize / 2;
         mImageYOrig = mWorldSize / 2;
-        mRaster =  new BufferedImage(mWorldSize + 5, mWorldSize + 5, BufferedImage.TYPE_BYTE_GRAY);
+        mRaster =  new BufferedImage(mWorldSize + 20, mWorldSize + 20, BufferedImage.TYPE_BYTE_GRAY);
     }
 
     public void setProbability(int worldX, int worldY, float probability) {
-        int imageX = mImageXOrig + worldX;
-        int imageY = mImageYOrig - worldY;
+        synchronized (lock) {
+            int imageX = mImageXOrig + worldX;
+            int imageY = mImageYOrig - worldY;
 
-        System.out.println("X: " + Integer.toString(imageX));
-        System.out.println("Y: " + Integer.toString(imageY));
+            System.out.println("Given x: " + Integer.toString(worldX));
+            System.out.println("Given y: " + Integer.toString(worldY));
+            System.out.println("X: " + Integer.toString(imageX));
+            System.out.println("Y: " + Integer.toString(imageY));
 
-        float[] pixel = {probability * 255, probability * 255, probability * 255};
-        mRaster.getRaster().setPixel(imageX, imageY, pixel);
+            if(imageY < 0 || imageX < 0)
+                return;
+
+            float[] pixel = {probability * 255, probability * 255, probability * 255};
+            mRaster.getRaster().setPixel(imageX, imageY, pixel);
+        }
     }
 
     public int getWorldSize() {
@@ -45,8 +53,10 @@ public class ProbabilityMap extends JPanel {
     }
 
     public void paint(Graphics g) {
-        super.paint(g);
-        Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(mRaster, null, null);
+        synchronized (lock) {
+            super.paint(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.drawImage(mRaster, null, null);
+        }
     }
 }

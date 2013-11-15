@@ -261,6 +261,7 @@ public class BZRFlag {
             for(int col = 0; col < cols; col++) {
                 gridResponse.occupiedObservation[row][col] = (line.charAt(col) == '0');
             }
+            row++;
         }
 
         return gridResponse;
@@ -526,7 +527,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 39135);
+        BZRFlag blueServer = new BZRFlag("localhost", 58582);
         /*blueServer.handshake();
         blueServer.readOccGrid(0);*/
 
