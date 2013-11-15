@@ -450,7 +450,7 @@ public class BZRFlag {
     }
 
     public static void plotWorld() throws IOException {
-        BZRFlag agent = new BZRFlag("localhost", 39248);
+        BZRFlag agent = new BZRFlag("localhost", 50289);
         agent.handshake();
         ArrayList<Obstacle> obstacles = agent.getObstacles();
 
@@ -527,7 +527,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 58582);
+        BZRFlag blueServer = new BZRFlag("localhost", 59636);
         /*blueServer.handshake();
         blueServer.readOccGrid(0);*/
 
