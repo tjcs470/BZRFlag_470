@@ -32,6 +32,10 @@ public class ProbabilityMap extends JPanel {
     public void setProbability(int worldX, int worldY, float probability) {
         int imageX = mImageXOrig + worldX;
         int imageY = mImageYOrig - worldY;
+
+        System.out.println("X: " + Integer.toString(imageX));
+        System.out.println("Y: " + Integer.toString(imageY));
+
         float[] pixel = {probability * 255, probability * 255, probability * 255};
         mRaster.getRaster().setPixel(imageX, imageY, pixel);
     }

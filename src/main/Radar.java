@@ -1,6 +1,7 @@
 package main;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,10 +32,25 @@ public class Radar extends JFrame implements Runnable{
         mAnimator.start();
     }
 
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+        Toolkit.getDefaultToolkit().sync();
+        g.dispose();
+    }
+
     @Override
     public void run() {
         while(true) {
             repaint();
+
+            try {
+                Thread.sleep(50);
+            }
+            catch (InterruptedException e) {
+                System.out.println("Interuppted");
+            }
         }
     }
 }
