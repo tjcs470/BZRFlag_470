@@ -9,27 +9,29 @@ package main;
  */
 public class GridFilter {
     /** The size of the grid */
-    int mGridSize;
+    private int mGridSize;
     /** P(S = occupied | O)*/
-    double [][] mProbOccupied;
+    private double [][] mProbOccupied;
     /** P(O = occupied | S = occupied) the true positive */
-    double mTruePos;
+    private double mTruePos;
     /** P(O = unoccupied | S = occupied) the true positive */
-    double mFalsePos;
+    private double mFalsePos;
     /** P(O = unoccupied | S = unoccupied) the true negative */
-    double mTrueNeg;
+    private double mTrueNeg;
     /** P(O = unoccupied | S = occupied) the false negative */
-    double mFalseNeg;
+    private double mFalseNeg;
+    /**The image used to represent the grid*/
+    private ProbabilityMap mProbabilityMap;
 
     /**
      * Constructor
      */
-    public GridFilter(int gridSize, double initProb, double truePos, double trueNeg) {
+    public GridFilter(int worldSize, double initProb, double truePos, double trueNeg) {
         assert(initProb > 0 && initProb <= 1.0);
 
-        mGridSize = gridSize;
+        mGridSize = worldSize;
 
-        mProbOccupied = new double [gridSize][gridSize];
+        mProbOccupied = new double [worldSize][worldSize];
         for(int i = 0; i < mGridSize; i++)
             for(int j = 0; j < mGridSize; j++)
                 mProbOccupied[i][j] = initProb;
@@ -43,9 +45,9 @@ public class GridFilter {
     /**
      * Filters belief of occupancy
      */
-    public void filter(int i, int j, boolean occupied)
+    public void filter(int i, int j, boolean observedOccupied)
     {
-        if(occupied) {
+        if(observedOccupied) {
             double truePos = mTruePos * mProbOccupied[i][j];
             double falsePos = mFalsePos * (1.0 - mProbOccupied[i][j]);
             mProbOccupied[i][j] = truePos / (truePos + falsePos);

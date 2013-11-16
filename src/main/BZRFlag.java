@@ -190,7 +190,7 @@ public class BZRFlag {
      * Queries the server for the world constants
      */
     private Pattern mServerConstPattern = Pattern.compile("constant (.*?) (.*?)");
-    public ServerConstants readConstants() throws IOException
+    public ServerConstants getConstants() throws IOException
     {
         String queryCmd = "constants";
         sendLine(queryCmd);
@@ -211,7 +211,7 @@ public class BZRFlag {
 
         matcher = mServerConstPattern.matcher(constResponses.get(WORLD_SIZE));
         assert(matcher.matches());
-        serverConstants.worldSize = parseDouble(matcher.group(2).toUpperCase());
+        serverConstants.worldSize = Integer.parseInt(matcher.group(2).toUpperCase());
 
         matcher = mServerConstPattern.matcher(constResponses.get(TRUE_POS));
         assert(matcher.matches());
@@ -229,21 +229,43 @@ public class BZRFlag {
      * @throws IOException
      */
     private Pattern locPattern = Pattern.compile(
-            "at (.*?), (.*?)"
+            "at (.*?),(.*?)"
     );
-    private Pattern sizePatter = Pattern.compile(
+    private Pattern sizePattern = Pattern.compile(
             "size (.*?)x(.*?)"
     );
-    public void readOccGrid(int botId) throws IOException
+    public OccGridResponse readOccGrid(int botId) throws IOException
     {
         String queryCmd = String.format("occgrid %d", botId);
         sendLine(queryCmd);
         readAck(queryCmd);
         ArrayList<String> occGridLines = readArrayResponse();
+        System.out.println(occGridLines);
 
         Matcher matcher = null;
         matcher = locPattern.matcher(occGridLines.get(0));
         assert(matcher.matches());
+        int x = Integer.parseInt(matcher.group(1));
+        int y = Integer.parseInt(matcher.group(2));
+
+
+        matcher = sizePattern.matcher(occGridLines.get(1));
+        assert(matcher.matches());
+
+        int rows = Integer.parseInt(matcher.group(1));
+        int cols = Integer.parseInt(matcher.group(2));
+        OccGridResponse gridResponse = new OccGridResponse(x, y, rows, cols);
+
+        int row = 0;
+        for(int i = 2; i < occGridLines.size(); i++) {
+            String line = occGridLines.get(i);
+            for(int col = 0; col < cols; col++) {
+                gridResponse.occupiedObservation[row][col] = (line.charAt(col) == '0');
+            }
+            row++;
+        }
+
+        return gridResponse;
     }
 
     /**
@@ -429,7 +451,7 @@ public class BZRFlag {
     }
 
     public static void plotWorld() throws IOException {
-        BZRFlag agent = new BZRFlag("localhost", 39248);
+        BZRFlag agent = new BZRFlag("localhost", 50289);
         agent.handshake();
         ArrayList<Obstacle> obstacles = agent.getObstacles();
 
@@ -449,7 +471,7 @@ public class BZRFlag {
 
 
     public ArrayList<NavigatorTank> getNavigatorTanks(Tank.TeamColor myColor) throws IOException{
-        double worldDimension = readConstants().worldSize;
+        double worldDimension = getConstants().worldSize;
 
         String queryCmd = "mytanks";
         sendLine(queryCmd);
@@ -531,6 +553,12 @@ public class BZRFlag {
         redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
 //
 //
+//        BZRFlag redServer = new BZRFlag("localhost", 55179);
+//        redServer.handshake();
+//        redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
+
+//        greenServer.handshake();
+//        ServerConstants constants = greenServer.readConstants();
 
         NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
@@ -539,7 +567,7 @@ public class BZRFlag {
         //DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
         while(true) {
-            navigatorAgent.tick();
+           navigatorAgent.tick();
            //pfAgentBlue.tick();
            //pfAgentGreen.tick();
            //pfAgentRed.tick();

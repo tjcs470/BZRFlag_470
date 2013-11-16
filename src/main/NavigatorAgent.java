@@ -1,8 +1,6 @@
 package main;
 
-import ServerResponse.MyTank;
-import ServerResponse.NavigatorTank;
-import ServerResponse.Tank;
+import ServerResponse.*;
 import math.geom2d.Point2D;
 import potentialFields.PotentialField;
 import potentialFields.circular.SeekGoalCircularPF;
@@ -26,6 +24,10 @@ public class NavigatorAgent {
     private List<Double> mTimeDiffs = new ArrayList<Double>(10);
     private Map<Integer, Integer> tankGoalMap = new HashMap<Integer, Integer>(); //stores current goal of tank
     private Map<Integer, Point2D> tankPosMap = new HashMap<Integer, Point2D>(); //stores previous position of tank for stuck detection
+    /**The probability map*/
+    private ProbabilityMap mProbabilityMap;
+    /**JFrame that renders the probability map*/
+    private Radar mRadar;
     private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
     Random gen = new Random();
 
@@ -45,6 +47,9 @@ public class NavigatorAgent {
             tankAlignmentCounter.put(i,0);
             mServer.speed(i, 0);
         }
+        ServerConstants serverConstants = mServer.getConstants();
+        mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
+        mRadar = new Radar(mProbabilityMap);
     }
 
 
@@ -56,7 +61,18 @@ public class NavigatorAgent {
 
 //            if(tankIndex > 0) continue;
 
-//            if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
+            OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
+            for(int row = 0; row < gridResponse.rows; row++) {
+                for(int col = 0; col < gridResponse.cols; col++) {
+                    mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, gridResponse.occupiedObservation[row][col]);
+                    /*if(gridResponse.occupiedObservation[row][col])
+                        mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, 1);
+                    else
+                        mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, .75f);*/
+                }
+            }
+            System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
+
             if(tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
                 int goalNum = tankGoalMap.get(tankIndex);
