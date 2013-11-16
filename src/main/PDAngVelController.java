@@ -28,13 +28,25 @@ public class PDAngVelController {
         if((goalAng > 0 && currAng < 0) || (goalAng < 0 && currAng > 0)) {
             double ang0 = (Math.PI - Math.abs(currAng)) + (Math.PI - Math.abs(goalAng));
             double ang1 = Math.abs(currAng) + Math.abs(goalAng);
-            if(ang0 > ang1)
+            System.out.println("Ang0, Ang1: " + ang0 + ", " + ang1);
+            if(ang0 > ang1) {
                 error = ang1;
-            else
+                if(currAng > 0) {
+                    error = -error;
+                }
+            }
+            else{
                 error = ang0;
+                if(currAng < 0) {
+                    error = -error;
+                }
+            }
 
-            if(error < 0 && currAng > 0 || error > 0 && currAng < 0)
-                error = -error;
+//            if(currAng > 0 )
+//            if(error < 0 && currAng > 0 || error > 0 && currAng < 0) {
+//                System.out.println("Error switching signs");
+//                error = -error;
+//            }
         }
         else  {
            error = goalAng - currAng;
@@ -45,14 +57,12 @@ public class PDAngVelController {
 
         double force = mKP * error + mKD * errorDeriv;
 
-//        System.out.println("Time diffs: " + Double.toString(timeDiff));
-//        System.out.println("mKP: " + Double.toString(mKP));
-//        System.out.println("mKD: " + Double.toString(mKD));
-        System.out.println("Goal angle: " + Double.toString(goalAng));
-        System.out.println("Current angle: " + Double.toString(currAng));
-        System.out.println("Error: " + Double.toString(error));
-        System.out.println("Error derivative: " + Double.toString(errorDeriv));
-        System.out.println("Force: " + Double.toString(force));
+        System.out.println("Time diff: " + timeDiff);
+        System.out.println("Goal angle: " + goalAng);
+        System.out.println("Current angle: " + currAng);
+        System.out.println("Error: " + error);
+        System.out.println("Error derivative: " + errorDeriv);
+        System.out.println("Force: " + force);
 
         return force;
     }

@@ -146,7 +146,8 @@ public class BZRFlag {
         String command = String.format("angvel %d %s", botId, angVel);
         sendLine(command);
         readAck(command);
-        return readBool();
+        BoolResponse resp = readBool();
+        return resp;
     }
 
     /**
@@ -480,6 +481,9 @@ public class BZRFlag {
             double yVel = parseDouble(matcher.group(11));
             Vector vel = new Vector(xVel, yVel);
             double angVel = parseDouble(matcher.group(12));
+            if(index == 0) {
+                System.out.print("");
+            }
 
             NavigatorTank tank = new NavigatorTank(index,
                     callSign,
@@ -511,24 +515,22 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 47321);
+        BZRFlag blueServer = new BZRFlag("localhost", 36735);
 
 
-//        BZRFlag purpleServer = new BZRFlag("localhost", 57785);
-//        purpleServer.handshake();
-//        purpleServer.sendAllTanksInMotion(Tank.TeamColor.PURPLE);
+        BZRFlag purpleServer = new BZRFlag("localhost", 42237);
+        purpleServer.handshake();
+        purpleServer.sendAllTanksInMotion(Tank.TeamColor.PURPLE);
 //
-//        BZRFlag greenServer = new BZRFlag("localhost", 52360);
-//        greenServer.handshake();
-//        greenServer.sendAllTanksInMotion(Tank.TeamColor.GREEN);
+        BZRFlag greenServer = new BZRFlag("localhost", 41485);
+        greenServer.handshake();
+        greenServer.sendAllTanksInMotion(Tank.TeamColor.GREEN);
 //
-//        BZRFlag redServer = new BZRFlag("localhost", 55179);
-//        redServer.handshake();
-//        redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
-
-
-//        greenServer.handshake();
-//        ServerConstants constants = greenServer.readConstants();
+        BZRFlag redServer = new BZRFlag("localhost", 38570);
+        redServer.handshake();
+        redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
+//
+//
 
         NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);

@@ -38,7 +38,7 @@ public class NavigatorAgent {
         mPrevTime = System.currentTimeMillis();
         mTankPdControllers = new ArrayList<PDAngVelController>();
         for(int i = 0; i < 10; i++) {
-            PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
+            PDAngVelController pdController = new PDAngVelController(.2, .8);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
             tankGoalMap.put(i,0);
@@ -52,7 +52,7 @@ public class NavigatorAgent {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
-            if(tankIndex > 0) continue;
+            if(tankIndex % 2 == 0) continue;
 
 //            if(tankIndex > 0) continue;
 
@@ -63,6 +63,7 @@ public class NavigatorAgent {
                 goalNum++;
                 if(goalNum > 7) goalNum = 0;
                 tankGoalMap.put(tankIndex, goalNum);
+
                 //tell tank to stop so it can get aligned
                 mServer.speed(tankIndex, 0);
                 tankAlignmentCounter.put(tankIndex, 0);
@@ -79,19 +80,28 @@ public class NavigatorAgent {
             double goalAngle = vectorForce.getAngle();
 
             double angAcceleration = mTankPdControllers.get(tankIndex).getAcceleration(goalAngle, currAng, timeDiffInSec);
+//            if(angAcceleration < 0 && currAngVel < 0) {
+//                System.out.println("Ang acc switching signs");
+//                angAcceleration = -angAcceleration;
+//            }
             double targetVel = currAngVel + angAcceleration;
+
+            System.out.println("Curr ang vel: " + currAngVel);
+            System.out.println("ang acc: " + angAcceleration);
+            System.out.println("target vel: " + targetVel);
+            System.out.println("\n");
 
             mServer.angVel(tankIndex, targetVel);
 
-            if(tankAlignmentCounter.get(tankIndex) > 55) {
+            if(tankAlignmentCounter.get(tankIndex) > 10) {
                 mServer.speed(tankIndex, 1);
             } else {
                 int alignCount = tankAlignmentCounter.get(tankIndex);
                 alignCount++;
                 tankAlignmentCounter.put(tankIndex, alignCount);
             }
-//            if(gen.nextDouble() < .2)
-//                mServer.shoot(tankIndex);
+            if(gen.nextDouble() < .1)
+                mServer.shoot(tankIndex);
         }
 
     }
