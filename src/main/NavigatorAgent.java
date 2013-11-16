@@ -62,9 +62,8 @@ public class NavigatorAgent {
             if(tank.getStatus() == Tank.TankStatus.DEAD) {
                 System.out.println("Tank["+tankIndex+"] is dead");
                 tankAlignmentCounter.put(tankIndex, 0); // need to re align if killed
+                continue;
             }
-
-//            if(tankIndex > 0) continue;
 
             OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
             for(int row = 0; row < gridResponse.rows; row++) {

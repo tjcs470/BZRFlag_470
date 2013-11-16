@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = false;
+    private boolean mDebug = true;
 
     /**
      * Constructor
@@ -86,8 +86,6 @@ public class BZRFlag {
         Matcher matcher = ackRegex.matcher(ackLine);
 
         assert(matcher.matches());
-        parseDouble(matcher.group(1));
-
         return true;
     }
 
