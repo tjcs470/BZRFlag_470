@@ -25,7 +25,7 @@ public class NavigatorAgent {
     private ProbabilityMap mProbabilityMap;
     /**JFrame that renders the probability map*/
     private Radar mRadar;
-    private final int tankAlignments = 10;
+    private final int tankAlignments = 20;
     private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
     Random gen = new Random();
     private boolean debug = false;
@@ -37,7 +37,7 @@ public class NavigatorAgent {
         mTeamColor = myTeamColor;
         mTankPdControllers = new ArrayList<PDAngVelController>();
         for(int i = 0; i < 10; i++) {
-            PDAngVelController pdController = new PDAngVelController(.2, .8);
+            PDAngVelController pdController = new PDAngVelController(.2, .9);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
             tankGoalMap.put(i,0);
@@ -47,9 +47,16 @@ public class NavigatorAgent {
         ServerConstants serverConstants = mServer.getConstants();
         mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
         mRadar = new Radar(mProbabilityMap);
+//        validTankIndexes.add(0);
         validTankIndexes.add(1);
+        validTankIndexes.add(2);
+//        validTankIndexes.add(3);
         validTankIndexes.add(4);
+//        validTankIndexes.add(5);
+        validTankIndexes.add(6);
+//        validTankIndexes.add(7);
         validTankIndexes.add(8);
+//        validTankIndexes.add(9);
     }
 
 
@@ -120,7 +127,7 @@ public class NavigatorAgent {
             System.out.println("Tank["+tankIndex+"] align count is " +alignCount);
             tankAlignmentCounter.put(tankIndex, alignCount);
 //            if(gen.nextDouble() < .1)
-//                mServer.shoot(tankIndex);
+                mServer.shoot(tankIndex);
         }
 
     }
