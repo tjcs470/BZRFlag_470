@@ -7,10 +7,7 @@ import potentialFields.circular.SeekGoalCircularPF;
 import potentialFields.rectangular.SeekGoalRectangularPF;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +28,8 @@ public class NavigatorAgent {
     private ProbabilityMap mProbabilityMap;
     /**JFrame that renders the probability map*/
     private Radar mRadar;
+    private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
+    Random gen = new Random();
 
     private List<NavigatorTank> army;
 
@@ -40,11 +39,13 @@ public class NavigatorAgent {
         mTeamColor = myTeamColor;
         mPrevTime = System.currentTimeMillis();
         mTankPdControllers = new ArrayList<PDAngVelController>();
-        for(int i = 0; i < 1; i++) {
+        for(int i = 0; i < 10; i++) {
             PDAngVelController pdController = new PDAngVelController(0.2, 0.8);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
-            tankGoalMap.put(i,1);
+            tankGoalMap.put(i,0);
+            tankAlignmentCounter.put(i,0);
+            mServer.speed(i, 0);
         }
         ServerConstants serverConstants = mServer.getConstants();
         mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
@@ -56,9 +57,9 @@ public class NavigatorAgent {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
+            if(tankIndex > 0) continue;
 
-            if(tankIndex > 0)
-                continue;
+//            if(tankIndex > 0) continue;
 
             OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
             for(int row = 0; row < gridResponse.rows; row++) {
@@ -72,12 +73,15 @@ public class NavigatorAgent {
             }
             System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
 
-            if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
+            if(tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
                 int goalNum = tankGoalMap.get(tankIndex);
                 goalNum++;
                 if(goalNum > 7) goalNum = 0;
                 tankGoalMap.put(tankIndex, goalNum);
+                //tell tank to stop so it can get aligned
+                mServer.speed(tankIndex, 0);
+                tankAlignmentCounter.put(tankIndex, 0);
             }
 
             double newTime = System.currentTimeMillis();
@@ -94,20 +98,31 @@ public class NavigatorAgent {
             double targetVel = currAngVel + angAcceleration;
 
             mServer.angVel(tankIndex, targetVel);
-            mServer.speed(tankIndex, 1);
-            mServer.shoot(tankIndex);
+
+            if(tankAlignmentCounter.get(tankIndex) > 55) {
+                mServer.speed(tankIndex, 1);
+            } else {
+                int alignCount = tankAlignmentCounter.get(tankIndex);
+                alignCount++;
+                tankAlignmentCounter.put(tankIndex, alignCount);
+            }
+//            if(gen.nextDouble() < .2)
+//                mServer.shoot(tankIndex);
         }
 
     }
 
     private boolean isTankStuck(NavigatorTank tank) {
-        Point2D pos = tankPosMap.get(tank.getIndex());
-        return pos != null && pos.distance(tank.getPos()) < 2;
+        Point2D prevPos = tankPosMap.get(tank.getIndex());
+        Point2D currPos = tank.getPos();
+        tankPosMap.put(tank.getIndex(), currPos);
+
+        return prevPos != null && prevPos.distance(currPos) < .3;
     }
 
     private SeekGoalCircularPF getGoalForTank(NavigatorTank t) {
         Point2D desiredLocation = t.getDesiredLocation(tankGoalMap.get(t.getIndex()));
-        System.out.println("Tank[" + t.getIndex() + "] goal: " + desiredLocation);
+//        System.out.println("Tank[" + t.getIndex() + "] goal: " + desiredLocation);
         return new SeekGoalCircularPF(1, desiredLocation, 30, 1);
     }
 
