@@ -2,9 +2,7 @@ package main;
 
 import ServerResponse.*;
 import math.geom2d.Point2D;
-import potentialFields.PotentialField;
 import potentialFields.circular.SeekGoalCircularPF;
-import potentialFields.rectangular.SeekGoalRectangularPF;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,7 +17,6 @@ public class NavigatorAgent {
 
     private BZRFlag mServer;
     private Tank.TeamColor mTeamColor;
-    private long mPrevTime;
     private List<PDAngVelController> mTankPdControllers;
     private List<Double> mTimeDiffs = new ArrayList<Double>(10);
     private Map<Integer, Integer> tankGoalMap = new HashMap<Integer, Integer>(); //stores current goal of tank
@@ -28,16 +25,16 @@ public class NavigatorAgent {
     private ProbabilityMap mProbabilityMap;
     /**JFrame that renders the probability map*/
     private Radar mRadar;
+    private final int tankAlignments = 10;
     private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
     Random gen = new Random();
-
-    private List<NavigatorTank> army;
+    private boolean debug = false;
+    private Set<Integer> validTankIndexes = new HashSet<Integer>();
 
     public NavigatorAgent(BZRFlag teamConnection, Tank.TeamColor myTeamColor) throws IOException {
         mServer = teamConnection;
         mServer.handshake();
         mTeamColor = myTeamColor;
-        mPrevTime = System.currentTimeMillis();
         mTankPdControllers = new ArrayList<PDAngVelController>();
         for(int i = 0; i < 10; i++) {
             PDAngVelController pdController = new PDAngVelController(.2, .8);
@@ -50,14 +47,22 @@ public class NavigatorAgent {
         ServerConstants serverConstants = mServer.getConstants();
         mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
         mRadar = new Radar(mProbabilityMap);
+        validTankIndexes.add(1);
+        validTankIndexes.add(4);
+        validTankIndexes.add(8);
     }
 
 
     public void tick() throws IOException {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
+
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
-            if(tankIndex % 2 == 0) continue;
+            if(!validTankIndexes.contains(tankIndex)) continue;
+            if(tank.getStatus() == Tank.TankStatus.DEAD) {
+                System.out.println("Tank["+tankIndex+"] is dead");
+                tankAlignmentCounter.put(tankIndex, 0); // need to re align if killed
+            }
 
 //            if(tankIndex > 0) continue;
 
@@ -73,7 +78,7 @@ public class NavigatorAgent {
             }
             System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
 
-            if(tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
+            if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
                 int goalNum = tankGoalMap.get(tankIndex);
                 goalNum++;
@@ -96,38 +101,38 @@ public class NavigatorAgent {
             double goalAngle = vectorForce.getAngle();
 
             double angAcceleration = mTankPdControllers.get(tankIndex).getAcceleration(goalAngle, currAng, timeDiffInSec);
-//            if(angAcceleration < 0 && currAngVel < 0) {
-//                System.out.println("Ang acc switching signs");
-//                angAcceleration = -angAcceleration;
-//            }
             double targetVel = currAngVel + angAcceleration;
 
-            System.out.println("Curr ang vel: " + currAngVel);
-            System.out.println("ang acc: " + angAcceleration);
-            System.out.println("target vel: " + targetVel);
-            System.out.println("\n");
+            if(debug) {
+                System.out.println("Curr ang vel: " + currAngVel);
+                System.out.println("ang acc: " + angAcceleration);
+                System.out.println("target vel: " + targetVel);
+                System.out.println("\n");
+            }
 
             mServer.angVel(tankIndex, targetVel);
 
-            if(tankAlignmentCounter.get(tankIndex) > 10) {
+            int alignCount = tankAlignmentCounter.get(tankIndex);
+            if(alignCount > tankAlignments) {
                 mServer.speed(tankIndex, 1);
-            } else {
-                int alignCount = tankAlignmentCounter.get(tankIndex);
-                alignCount++;
-                tankAlignmentCounter.put(tankIndex, alignCount);
             }
-            if(gen.nextDouble() < .1)
-                mServer.shoot(tankIndex);
+
+            alignCount++;
+            System.out.println("Tank["+tankIndex+"] align count is " +alignCount);
+            tankAlignmentCounter.put(tankIndex, alignCount);
+//            if(gen.nextDouble() < .1)
+//                mServer.shoot(tankIndex);
         }
 
     }
 
     private boolean isTankStuck(NavigatorTank tank) {
+        if(tankAlignmentCounter.get(tank.getIndex()) < (tankAlignments + 5)) return false; //tank is positioning itself, or has just barely started moving which is what the +5 is for
         Point2D prevPos = tankPosMap.get(tank.getIndex());
         Point2D currPos = tank.getPos();
         tankPosMap.put(tank.getIndex(), currPos);
 
-        return prevPos != null && prevPos.distance(currPos) < .3;
+        return prevPos != null && prevPos.distance(currPos) < .1;
     }
 
     private SeekGoalCircularPF getGoalForTank(NavigatorTank t) {
