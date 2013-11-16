@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = false;
+    private boolean mDebug = true;
 
     /**
      * Constructor
@@ -86,8 +86,6 @@ public class BZRFlag {
         Matcher matcher = ackRegex.matcher(ackLine);
 
         assert(matcher.matches());
-        parseDouble(matcher.group(1));
-
         return true;
     }
 
@@ -537,20 +535,20 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 36735);
+        BZRFlag blueServer = new BZRFlag("localhost", 52389);
 
 
-        BZRFlag purpleServer = new BZRFlag("localhost", 42237);
-        purpleServer.handshake();
-        purpleServer.sendAllTanksInMotion(Tank.TeamColor.PURPLE);
-//
-        BZRFlag greenServer = new BZRFlag("localhost", 41485);
-        greenServer.handshake();
-        greenServer.sendAllTanksInMotion(Tank.TeamColor.GREEN);
-//
-        BZRFlag redServer = new BZRFlag("localhost", 38570);
-        redServer.handshake();
-        redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
+//        BZRFlag purpleServer = new BZRFlag("localhost", 42237);
+//        purpleServer.handshake();
+//        purpleServer.sendAllTanksInMotion(Tank.TeamColor.PURPLE);
+
+//        BZRFlag greenServer = new BZRFlag("localhost", 41485);
+//        greenServer.handshake();
+//        greenServer.sendAllTanksInMotion(Tank.TeamColor.GREEN);
+
+//        BZRFlag redServer = new BZRFlag("localhost", 38570);
+//        redServer.handshake();
+//        redServer.sendAllTanksInMotion(Tank.TeamColor.RED);
 //
 //
 //        BZRFlag redServer = new BZRFlag("localhost", 55179);

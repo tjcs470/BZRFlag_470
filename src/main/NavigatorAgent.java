@@ -57,7 +57,10 @@ public class NavigatorAgent {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
-            if(tankIndex % 2 == 0) continue;
+            if(tankIndex % 3 != 0)
+                continue;
+            if(tank.getStatus() == Tank.TankStatus.DEAD)
+                continue;
 
 //            if(tankIndex > 0) continue;
 
