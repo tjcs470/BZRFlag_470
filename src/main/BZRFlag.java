@@ -29,7 +29,7 @@ public class BZRFlag {
     /**Input for messages from BZRflag game*/
     private final BufferedReader mIn;
     /**Debug flag*/
-    private boolean mDebug = true;
+    private boolean mDebug = false;
 
     /**
      * Constructor
@@ -449,7 +449,7 @@ public class BZRFlag {
     }
 
     public static void plotWorld() throws IOException {
-        BZRFlag agent = new BZRFlag("localhost", 50289);
+        BZRFlag agent = new BZRFlag("localhost", 43023);
         agent.handshake();
         ArrayList<Obstacle> obstacles = agent.getObstacles();
 
@@ -526,8 +526,12 @@ public class BZRFlag {
 
     private void sendAllTanksInMotion(Tank.TeamColor color) throws IOException {
         for(MyTank tank : getMyTanks(color)) {
-            speed(tank.getIndex(), 1.0);
-            angVel(tank.getIndex(), .1);
+            int i = tank.getIndex();
+            speed(i, 1.0);
+            double angle = -.1 + .02 * i;
+            if(angle == 0) angle = .001;
+            System.out.println(angle);
+            angVel(i, .015 * (i+1));
         }
     }
 
@@ -535,8 +539,9 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 49039);
-
+        BZRFlag blueServer = new BZRFlag("localhost", 56688);
+        blueServer.handshake();
+        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
 
 //        BZRFlag purpleServer = new BZRFlag("localhost", 42237);
 //        purpleServer.handshake();

@@ -57,12 +57,12 @@ public class PDAngVelController {
 
         double force = mKP * error + mKD * errorDeriv;
 
-        System.out.println("Time diff: " + timeDiff);
-        System.out.println("Goal angle: " + goalAng);
-        System.out.println("Current angle: " + currAng);
-        System.out.println("Error: " + error);
-        System.out.println("Error derivative: " + errorDeriv);
-        System.out.println("Force: " + force);
+//        System.out.println("Time diff: " + timeDiff);
+//        System.out.println("Goal angle: " + goalAng);
+//        System.out.println("Current angle: " + currAng);
+//        System.out.println("Error: " + error);
+//        System.out.println("Error derivative: " + errorDeriv);
+//        System.out.println("Force: " + force);
 
         return force;
     }

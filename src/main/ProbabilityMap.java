@@ -12,7 +12,6 @@ import java.awt.image.BufferedImage;
  * User: ty
  * Date: 11/12/13
  * Time: 10:07 PM
- * To change this template use File | Settings | File Templates.
  */
 public class ProbabilityMap extends JPanel implements Runnable{
     /** The size of the grid */
