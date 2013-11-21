@@ -115,8 +115,8 @@ public class ProbabilityMap extends JPanel implements Runnable{
         double unoccThreshold = 0.2;
         double occuThreshold = .8;
 
-        for(int i = -1; i < 2; i++) {
-            for(int j = -1; j < 2; j++) {
+        for(int i = -2; i < 3; i++) {
+            for(int j = -2; j < 3; j++) {
                 if((imageX + i < 0 || imageX + i >= mWorldSize) ||
                     (imageY + j < 0 || imageY + j >= mWorldSize))
                     continue;
