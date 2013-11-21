@@ -40,8 +40,6 @@ public class NavigatorAgent {
             PDAngVelController pdController = new PDAngVelController(.2, .9);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
-            tankGoalMap.put(i,0);
-            tankAlignmentCounter.put(i,0);
             sendInCircularMotion(i);
         }
         ServerConstants serverConstants = mServer.getConstants();
@@ -51,10 +49,14 @@ public class NavigatorAgent {
 
     public void sendInCircularMotion(int tankIndex) throws IOException {
         mServer.speed(tankIndex, 1.0);
-        double angle = -.01 + .002 * tankIndex;
-        if(angle == 0) angle = .001;
-        System.out.println(angle);
-        mServer.angVel(tankIndex, angle);
+//        double angle = -.1 + .02 * tankIndex;
+//        if(angle == 0) angle = .01;
+//        System.out.println(angle);
+        if(tankIndex % 2 == 0) {
+            mServer.angVel(tankIndex, .07);
+        } else {
+            mServer.angVel(tankIndex, -.07);
+        }
     }
 
 

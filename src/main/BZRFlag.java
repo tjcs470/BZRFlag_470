@@ -238,7 +238,7 @@ public class BZRFlag {
         sendLine(queryCmd);
         readAck(queryCmd);
         ArrayList<String> occGridLines = readArrayResponse();
-        System.out.println(occGridLines);
+//        System.out.println(occGridLines);
 
         Matcher matcher = null;
         matcher = locPattern.matcher(occGridLines.get(0));
@@ -502,7 +502,7 @@ public class BZRFlag {
             Vector vel = new Vector(xVel, yVel);
             double angVel = parseDouble(matcher.group(12));
             if(index == 0) {
-                System.out.print("");
+//                System.out.print("");
             }
 
             NavigatorTank tank = new NavigatorTank(index,
@@ -530,7 +530,7 @@ public class BZRFlag {
             speed(i, 1.0);
             double angle = -.1 + .02 * i;
             if(angle == 0) angle = .001;
-            System.out.println(angle);
+//            System.out.println(angle);
             angVel(i, .015 * (i+1));
         }
     }
@@ -539,7 +539,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 34820);
+        BZRFlag blueServer = new BZRFlag("localhost", 54707);
         blueServer.handshake();
 //        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
 

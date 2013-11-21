@@ -28,7 +28,7 @@ public class PDAngVelController {
         if((goalAng > 0 && currAng < 0) || (goalAng < 0 && currAng > 0)) {
             double ang0 = (Math.PI - Math.abs(currAng)) + (Math.PI - Math.abs(goalAng));
             double ang1 = Math.abs(currAng) + Math.abs(goalAng);
-            System.out.println("Ang0, Ang1: " + ang0 + ", " + ang1);
+//            System.out.println("Ang0, Ang1: " + ang0 + ", " + ang1);
             if(ang0 > ang1) {
                 error = ang1;
                 if(currAng > 0) {
