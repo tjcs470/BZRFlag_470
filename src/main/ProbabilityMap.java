@@ -93,8 +93,9 @@ public class ProbabilityMap extends JPanel implements Runnable{
      * just return the center point
      */
     public Point2D getUnexploredLoc() {
-        for(int xImg = 50; xImg < mWorldSize; xImg++) {
-            for(int yImg = 50; yImg < mWorldSize; yImg++) {
+        int bound = 50;
+        for(int xImg = bound; xImg < mWorldSize - bound; xImg++) {
+            for(int yImg = bound; yImg < mWorldSize - bound; yImg++) {
                 if(isUnexplored(xImg, yImg))
                     return new Point2D(xImg - mImageXOrig, mImageYOrig - yImg);
             }
@@ -120,7 +121,8 @@ public class ProbabilityMap extends JPanel implements Runnable{
                     (imageY + j < 0 || imageY + j >= mWorldSize))
                     continue;
 
-                if(mProbOccupied[imageX][imageY] < unoccThreshold || mProbOccupied[imageX][imageY] > occuThreshold)
+                if(mProbOccupied[imageX + i][imageY + j] < unoccThreshold ||
+                        mProbOccupied[imageX + i][imageY + j] > occuThreshold)
                     return false;
             }
         }
@@ -160,7 +162,15 @@ public class ProbabilityMap extends JPanel implements Runnable{
         int imageY = mImageYOrig - worldY;
 
         float[] pixel = {255, 155, 255};
-        mRaster.getRaster().setPixel(imageX, imageY, pixel);
+        for(int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++) {
+                if((imageX + i < 0 || imageX + i >= mWorldSize) ||
+                        (imageY + j < 0 || imageY + j >= mWorldSize))
+                    continue;
+
+                mRaster.getRaster().setPixel(imageX + i, imageY + j, pixel);
+            }
+        }
     }
 
     public int getWorldSize() {
