@@ -238,7 +238,6 @@ public class BZRFlag {
         sendLine(queryCmd);
         readAck(queryCmd);
         ArrayList<String> occGridLines = readArrayResponse();
-//        System.out.println(occGridLines);
 
         Matcher matcher = null;
         matcher = locPattern.matcher(occGridLines.get(0));
