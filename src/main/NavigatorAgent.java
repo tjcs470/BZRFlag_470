@@ -25,7 +25,7 @@ public class NavigatorAgent {
     private ProbabilityMap mProbabilityMap;
     /**JFrame that renders the probability map*/
     private Radar mRadar;
-    private final int tankAlignments = 20;
+    private final int tankAlignments = 15;
     private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
     Random gen = new Random();
     private boolean debug = false;
@@ -33,30 +33,31 @@ public class NavigatorAgent {
 
     public NavigatorAgent(BZRFlag teamConnection, Tank.TeamColor myTeamColor) throws IOException {
         mServer = teamConnection;
-        mServer.handshake();
         mTeamColor = myTeamColor;
         mTankPdControllers = new ArrayList<PDAngVelController>();
+//        validTankIndexes.add(0);
+//        validTankIndexes.add(1);
+        validTankIndexes.add(2);
+//        validTankIndexes.add(3);
+//        validTankIndexes.add(4);
+        validTankIndexes.add(5);
+//        validTankIndexes.add(6);
+        validTankIndexes.add(7);
+//        validTankIndexes.add(8);
+//        validTankIndexes.add(9);
         for(int i = 0; i < 10; i++) {
             PDAngVelController pdController = new PDAngVelController(.2, .9);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
             tankGoalMap.put(i,0);
             tankAlignmentCounter.put(i,0);
-            mServer.speed(i, 0);
+            if(validTankIndexes.contains(i)) {
+                mServer.speed(i, 0);
+            }
         }
         ServerConstants serverConstants = mServer.getConstants();
         mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
         mRadar = new Radar(mProbabilityMap);
-//        validTankIndexes.add(0);
-        validTankIndexes.add(1);
-        validTankIndexes.add(2);
-//        validTankIndexes.add(3);
-        validTankIndexes.add(4);
-//        validTankIndexes.add(5);
-        validTankIndexes.add(6);
-//        validTankIndexes.add(7);
-        validTankIndexes.add(8);
-//        validTankIndexes.add(9);
     }
 
 
@@ -65,7 +66,7 @@ public class NavigatorAgent {
 
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
-            if(!validTankIndexes.contains(tankIndex)) continue;
+            mServer.shoot(tankIndex);
             if(tank.getStatus() == Tank.TankStatus.DEAD) {
                 System.out.println("Tank["+tankIndex+"] is dead");
                 tankAlignmentCounter.put(tankIndex, 0); // need to re align if killed
@@ -82,7 +83,8 @@ public class NavigatorAgent {
                         mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, .75f);*/
                 }
             }
-            System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
+            if(!validTankIndexes.contains(tankIndex)) continue;
+//            System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
 
             if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
@@ -124,10 +126,10 @@ public class NavigatorAgent {
             }
 
             alignCount++;
-            System.out.println("Tank["+tankIndex+"] align count is " +alignCount);
+//            System.out.println("Tank["+tankIndex+"] align count is " +alignCount);
             tankAlignmentCounter.put(tankIndex, alignCount);
 //            if(gen.nextDouble() < .1)
-                mServer.shoot(tankIndex);
+//                mServer.shoot(tankIndex);
         }
 
     }
