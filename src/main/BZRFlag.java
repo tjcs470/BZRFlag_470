@@ -238,7 +238,6 @@ public class BZRFlag {
         sendLine(queryCmd);
         readAck(queryCmd);
         ArrayList<String> occGridLines = readArrayResponse();
-        System.out.println(occGridLines);
 
         Matcher matcher = null;
         matcher = locPattern.matcher(occGridLines.get(0));
@@ -539,7 +538,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 34820);
+        BZRFlag blueServer = new BZRFlag("localhost", 52371);
         blueServer.handshake();
 //        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
 
