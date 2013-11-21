@@ -29,35 +29,32 @@ public class NavigatorAgent {
     private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
     Random gen = new Random();
     private boolean debug = false;
-    private Set<Integer> validTankIndexes = new HashSet<Integer>();
+    private int goalTankOneIndex = 0;
+    private int goalTankTwoIndex = 1;
 
     public NavigatorAgent(BZRFlag teamConnection, Tank.TeamColor myTeamColor) throws IOException {
         mServer = teamConnection;
         mTeamColor = myTeamColor;
         mTankPdControllers = new ArrayList<PDAngVelController>();
-//        validTankIndexes.add(0);
-//        validTankIndexes.add(1);
-        validTankIndexes.add(2);
-//        validTankIndexes.add(3);
-//        validTankIndexes.add(4);
-        validTankIndexes.add(5);
-//        validTankIndexes.add(6);
-        validTankIndexes.add(7);
-//        validTankIndexes.add(8);
-//        validTankIndexes.add(9);
         for(int i = 0; i < 10; i++) {
             PDAngVelController pdController = new PDAngVelController(.2, .9);
             mTankPdControllers.add(pdController);
             mTimeDiffs.add((double) System.currentTimeMillis());
             tankGoalMap.put(i,0);
             tankAlignmentCounter.put(i,0);
-            if(validTankIndexes.contains(i)) {
-                mServer.speed(i, 0);
-            }
+            sendInCircularMotion(i);
         }
         ServerConstants serverConstants = mServer.getConstants();
         mProbabilityMap = new ProbabilityMap(serverConstants.worldSize, 0.5, serverConstants.truePos, serverConstants.trueNeg);
         mRadar = new Radar(mProbabilityMap);
+    }
+
+    public void sendInCircularMotion(int tankIndex) throws IOException {
+        mServer.speed(tankIndex, 1.0);
+        double angle = -.1 + .02 * tankIndex;
+        if(angle == 0) angle = .001;
+        System.out.println(angle);
+        mServer.angVel(tankIndex, angle);
     }
 
 
@@ -67,11 +64,8 @@ public class NavigatorAgent {
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
             mServer.shoot(tankIndex);
-            if(tank.getStatus() == Tank.TankStatus.DEAD) {
-                System.out.println("Tank["+tankIndex+"] is dead");
-                tankAlignmentCounter.put(tankIndex, 0); // need to re align if killed
-                continue;
-            }
+
+            if(tank.getStatus() == Tank.TankStatus.DEAD) continue;
 
             OccGridResponse gridResponse = mServer.readOccGrid(tankIndex);
             for(int row = 0; row < gridResponse.rows; row++) {
@@ -83,19 +77,24 @@ public class NavigatorAgent {
                         mProbabilityMap.updateProbability(gridResponse.x + row, gridResponse.y + col, .75f);*/
                 }
             }
-            if(!validTankIndexes.contains(tankIndex)) continue;
-//            System.out.println(mServer.readOccGrid(tankIndex).occupiedObservation);
 
-            if(isTankStuck(tank) || tank.hasReachedGoal(tankGoalMap.get(tankIndex))) {
+            if(tankIndex == goalTankOneIndex || tankIndex == goalTankTwoIndex) continue;
+
+            if(isTankStuck(tank)) {
                 System.out.println("Tank " + tankIndex + " is either stuck or has reached its goal of " + tank.getDesiredLocation(tankGoalMap.get(tankIndex)));
-                int goalNum = tankGoalMap.get(tankIndex);
-                goalNum++;
-                if(goalNum > 7) goalNum = 0;
-                tankGoalMap.put(tankIndex, goalNum);
+                if(tankIndex == goalTankOneIndex) {
+                    goalTankOneIndex++;
+                    if(goalTankOneIndex == 10)
+                        goalTankOneIndex = 0;
+                }
+                if(tankIndex == goalTankTwoIndex) {
+                    goalTankTwoIndex++;
+                    if(goalTankTwoIndex == 10)
+                        goalTankTwoIndex = 0;
+                }
+                sendInCircularMotion(tankIndex);
+                continue;
 
-                //tell tank to stop so it can get aligned
-                mServer.speed(tankIndex, 0);
-                tankAlignmentCounter.put(tankIndex, 0);
             }
 
             double newTime = System.currentTimeMillis();
@@ -117,19 +116,8 @@ public class NavigatorAgent {
                 System.out.println("target vel: " + targetVel);
                 System.out.println("\n");
             }
-
             mServer.angVel(tankIndex, targetVel);
 
-            int alignCount = tankAlignmentCounter.get(tankIndex);
-            if(alignCount > tankAlignments) {
-                mServer.speed(tankIndex, 1);
-            }
-
-            alignCount++;
-//            System.out.println("Tank["+tankIndex+"] align count is " +alignCount);
-            tankAlignmentCounter.put(tankIndex, alignCount);
-//            if(gen.nextDouble() < .1)
-//                mServer.shoot(tankIndex);
         }
 
     }
