@@ -51,7 +51,7 @@ public class NavigatorAgent {
 
     public void sendInCircularMotion(int tankIndex) throws IOException {
         mServer.speed(tankIndex, 1.0);
-        double angle = -.1 + .02 * tankIndex;
+        double angle = -.01 + .002 * tankIndex;
         if(angle == 0) angle = .001;
         System.out.println(angle);
         mServer.angVel(tankIndex, angle);
