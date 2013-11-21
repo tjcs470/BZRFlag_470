@@ -57,7 +57,7 @@ public class NavigatorAgent {
         ArrayList<NavigatorTank> army = mServer.getNavigatorTanks(mTeamColor);
         for(NavigatorTank tank : army) {
             int tankIndex = tank.getIndex();
-            if(tankIndex % 3 != 0)
+            if(tankIndex % 4 != 0)
                 continue;
             if(tank.getStatus() == Tank.TankStatus.DEAD)
                 continue;
@@ -134,7 +134,9 @@ public class NavigatorAgent {
     }
 
     private SeekGoalCircularPF getGoalForTank(NavigatorTank t) {
-        Point2D desiredLocation = t.getDesiredLocation(tankGoalMap.get(t.getIndex()));
+        //Point2D desiredLocation = t.getDesiredLocation(tankGoalMap.get(t.getIndex()));
+        Point2D desiredLocation = mProbabilityMap.getUnexploredLoc();
+        mProbabilityMap.highlightGoal((int) desiredLocation.x(), (int) desiredLocation.y());
 //        System.out.println("Tank[" + t.getIndex() + "] goal: " + desiredLocation);
         return new SeekGoalCircularPF(1, desiredLocation, 30, 1);
     }

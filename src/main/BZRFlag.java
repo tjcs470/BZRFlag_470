@@ -535,7 +535,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 52389);
+        BZRFlag blueServer = new BZRFlag("localhost", 49039);
 
 
 //        BZRFlag purpleServer = new BZRFlag("localhost", 42237);

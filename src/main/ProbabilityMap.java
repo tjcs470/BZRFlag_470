@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
+import math.geom2d.Point2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -45,7 +46,8 @@ public class ProbabilityMap extends JPanel implements Runnable{
         mWorldSize = worldSize;
         mImageXOrig = mWorldSize / 2;
         mImageYOrig = mWorldSize / 2;
-        mRaster =  new BufferedImage(mWorldSize + 20, mWorldSize + 20, BufferedImage.TYPE_BYTE_GRAY);
+        //mRaster =  new BufferedImage(mWorldSize + 20, mWorldSize + 20, BufferedImage.TYPE_BYTE_GRAY);
+        mRaster =  new BufferedImage(mWorldSize + 20, mWorldSize + 20, BufferedImage.TYPE_3BYTE_BGR);
 
         mProbOccupied = new double [worldSize][worldSize];
         for(int i = 0; i < mWorldSize; i++) {
@@ -88,6 +90,46 @@ public class ProbabilityMap extends JPanel implements Runnable{
     }
 
     /**
+     * Returns an unexplored portion of the map. If an area can't be found,
+     * just return the center point
+     */
+    public Point2D getUnexploredLoc() {
+        for(int xImg = 50; xImg < mWorldSize; xImg++) {
+            for(int yImg = 50; yImg < mWorldSize; yImg++) {
+                if(isUnexplored(xImg, yImg))
+                    return new Point2D(xImg - mImageXOrig, mImageYOrig - yImg);
+            }
+        }
+
+        return new Point2D(0, 0);
+    }
+
+    /**
+     * Checks to see if a location on the map is unexplored or not.
+     * A point is explored if the 8-connect neighbors are also unexplored.
+     * @param imageX
+     * @param imageY
+     * @return
+     */
+    private boolean isUnexplored(int imageX, int imageY) {
+        double unoccThreshold = 0.2;
+        double occuThreshold = .8;
+
+        for(int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++) {
+                if((imageX + i < 0 || imageX + i >= mWorldSize) ||
+                    (imageY + j < 0 || imageY + j >= mWorldSize))
+                    continue;
+
+                if(mProbOccupied[imageX][imageY] < unoccThreshold || mProbOccupied[imageX][imageY] > occuThreshold)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Sets the probability in the raster
      * @param imageX
      * @param imageY
@@ -106,6 +148,20 @@ public class ProbabilityMap extends JPanel implements Runnable{
             float[] pixel = {(1 - probability) * 255, (1 - probability) * 255, (1 - probability) * 255};
             mRaster.getRaster().setPixel(imageX, imageY, pixel);
         }
+    }
+
+    /**
+     * Highlights the goal pixel
+     * @param worldX
+     * @param worldY
+     */
+    public void highlightGoal(int worldX, int worldY) {
+
+        int imageX = mImageXOrig + worldX;
+        int imageY = mImageYOrig - worldY;
+
+        float[] pixel = {255, 155, 255};
+        mRaster.getRaster().setPixel(imageX, imageY, pixel);
     }
 
     public int getWorldSize() {
