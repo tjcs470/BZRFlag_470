@@ -146,7 +146,7 @@ public class ProbabilityMap extends JPanel implements Runnable{
             if(imageX < 0 || imageY < 0)
                 return;
 
-            float[] pixel = {(1 - probability) * 255, (1 - probability) * 255, (1 - probability) * 255};
+            float[] pixel = {(probability) * 255, (probability) * 255, (probability) * 255};
             mRaster.getRaster().setPixel(imageX, imageY, pixel);
         }
     }

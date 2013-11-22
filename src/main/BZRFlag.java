@@ -257,7 +257,7 @@ public class BZRFlag {
         for(int i = 2; i < occGridLines.size(); i++) {
             String line = occGridLines.get(i);
             for(int col = 0; col < cols; col++) {
-                gridResponse.occupiedObservation[row][col] = (line.charAt(col) == '0');
+                gridResponse.occupiedObservation[row][col] = (line.charAt(col) == '1');
             }
             row++;
         }
@@ -538,7 +538,7 @@ public class BZRFlag {
     public static void main(String args[]) throws IOException, InterruptedException {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 52371);
+        BZRFlag blueServer = new BZRFlag("localhost", 47058);
         blueServer.handshake();
 //        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
 
