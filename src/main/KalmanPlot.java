@@ -1,6 +1,8 @@
 package main;
 
+import com.panayotis.gnuplot.GNUPlotParameters;
 import com.panayotis.gnuplot.JavaPlot;
+import com.panayotis.gnuplot.plot.Graph3D;
 import com.panayotis.gnuplot.terminal.ImageTerminal;
 
 import javax.swing.*;
@@ -25,10 +27,22 @@ public class KalmanPlot extends JPanel implements Runnable {
      * Constructor
      */
     public KalmanPlot() {
-        JavaPlot p = new JavaPlot();
+        JavaPlot p = new JavaPlot(true);
         ImageTerminal imageTerminal = new ImageTerminal();
         p.setTerminal(imageTerminal);
-        p.addPlot("sin(x)");
+
+        //p.addPlot("sin(x)");
+        p.set("xrange", "[-400.0: 400.0]");
+        p.set("yrange", "[-400.0: 400.0]");
+        p.set("pm3d", "");
+        p.set("view", "map");
+        p.set("size", "square");
+        p.set("isosamples", "100");
+        String plotStr = "1.0/ (2.0 * pi * 30 * 20 * sqrt(1 - 0.2**2) )  * exp(-1.0/2.0 * ((x - 0)**2 / 30**2 + (y - 0)**2 / 20**2 - 2.0*0.2*(x - 0) * (y - 0) /(30*20) ) ) with pm3d";
+        p.addPlot(plotStr);
+        //p.addPlot("sin(x)*sin(y)");
+        //p.addPlot(plotStr);
+
         p.plot();
         mRaster =  imageTerminal.getImage();
     }
@@ -62,16 +76,12 @@ public class KalmanPlot extends JPanel implements Runnable {
     public void paint(Graphics g) {
         super.paint(g);
 
-        JavaPlot p = new JavaPlot();
-        ImageTerminal imageTerminal = new ImageTerminal();
-        p.setTerminal(imageTerminal);
-        mFoo += 1;
-        if(mFoo > 10)
-            mFoo = 0;
-        //p.addPlot("sin(x - " + mFoo + ")");
-        p.addPlot("sin(x - " + mFoo.toString() + ")");
-        p.plot();
-        mRaster =  imageTerminal.getImage();
+        /*p.set("pm3d", "");
+        p.set("view", "map");
+        p.set("size", "square");
+        p.set("isosamples", "100");*/
+        //p.plot();
+        //mRaster =  imageTerminal.getImage();
 
         Graphics2D g2 = (Graphics2D) g;
         Toolkit.getDefaultToolkit().sync();
