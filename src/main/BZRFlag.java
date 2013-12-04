@@ -1,11 +1,14 @@
 package main;
 
 import ServerResponse.*;
+import com.panayotis.gnuplot.JavaPlot;
+import com.panayotis.gnuplot.plot.Page;
+import com.panayotis.gnuplot.terminal.FileTerminal;
+import com.panayotis.gnuplot.terminal.GNUPlotTerminal;
+import com.panayotis.gnuplot.terminal.ImageTerminal;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -536,10 +539,36 @@ public class BZRFlag {
 
 
     public static void main(String args[]) throws IOException, InterruptedException {
+        JavaPlot p = new JavaPlot();
+        //p.set("term", "png");
+        //p.set("output", "/home/ty/MyStuff/cs470/plot/test.png");
+        ImageTerminal imageTerminal = new ImageTerminal();
+        //System.out.println("File:" + imageTerminal.getOutputFile());
+        p.setTerminal(imageTerminal);
+        p.addPlot("sin(x)");
+        p.plot();
+
+        BufferedImage image = imageTerminal.getImage();
+        System.out.println(image.getWidth());
+        System.out.println(image.getHeight());
+
+        GnuplotRadar gnuplotRadar = new GnuplotRadar();
+
+        /*for(int i = 0; i < 5; i++)
+        {
+            String plotStr = "sigma_x = 30; sigma_y = 20; rho = 0.2; shift = 100; splot 1.0/(2.0 * pi * sigma_x * sigma_y * sqrt(1 - rho**2) ) * exp(-1.0/2.0 * ((x - shift)**2 / sigma_x**2 + (y - shift)**2 / sigma_y**2 - 2.0*rho*(x - shift) * (y - shift) /(sigma_x*sigma_y) ) ) with pm3d;";
+            p.addPlot("sin(x)");
+            p.plot();
+        }*/
+        //p.setTerminal(GNUPlotTerminal);
+        //FileTerminal fileTerminal = new FileTerminal("png", "/home/ty/MyStuff/cs470/plot/test.png");
+        //p.setTerminal(fileTerminal);
+
+
 //        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BZRFlag blueServer = new BZRFlag("localhost", 47058);
-        blueServer.handshake();
+        //BZRFlag blueServer = new BZRFlag("localhost", 60298);
+        //blueServer.handshake();
 //        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
 
 //        BZRFlag purpleServer = new BZRFlag("localhost", 42237);
@@ -562,19 +591,19 @@ public class BZRFlag {
 //        greenServer.handshake();
 //        ServerConstants constants = greenServer.readConstants();
 
-        NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
+        //NavigatorAgent navigatorAgent = new NavigatorAgent(blueServer, Tank.TeamColor.BLUE);
         //PFAgent pfAgentGreen = new PFAgent(greenServer, Tank.TeamColor.GREEN);
         //PFAgent pfAgentRed = new PFAgent(redServer, Tank.TeamColor.RED);
         //DumbAgent dumbAgentGreen = new DumbAgent(greenServer, Tank.TeamColor.BLUE);
         //DumbAgent dumbAgentRed = new DumbAgent(redServer, Tank.TeamColor.PURPLE);
 
-        while(true) {
+        /*while(true) {
            navigatorAgent.tick();
            //pfAgentBlue.tick();
            //pfAgentGreen.tick();
            //pfAgentRed.tick();
            //dumbAgentGreen.tick();
            //dumbAgentRed.tick();
-        }
+        }*/
     }
 }
