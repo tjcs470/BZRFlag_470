@@ -21,28 +21,33 @@ public class KalmanPlot extends JPanel implements Runnable {
     private BufferedImage mRaster;
     /** Thread that runs the animation */
     private Thread mAnimator;
-    private Integer mFoo = 1;
+    /** X-Noise */
+    private double mXSigma;
+    /** Y-Noise */
+    private double mYSigma;
+    /** Rho */
+    private double mRho;
 
     /**
      * Constructor
      */
     public KalmanPlot() {
+        mXSigma = 30;
+        mYSigma = 40;
+        mRho = 0.2;
+
         JavaPlot p = new JavaPlot(true);
         ImageTerminal imageTerminal = new ImageTerminal();
         p.setTerminal(imageTerminal);
-
-        //p.addPlot("sin(x)");
         p.set("xrange", "[-400.0: 400.0]");
         p.set("yrange", "[-400.0: 400.0]");
         p.set("pm3d", "");
         p.set("view", "map");
         p.set("size", "square");
         p.set("isosamples", "100");
-        String plotStr = "1.0/ (2.0 * pi * 30 * 20 * sqrt(1 - 0.2**2) )  * exp(-1.0/2.0 * ((x - 0)**2 / 30**2 + (y - 0)**2 / 20**2 - 2.0*0.2*(x - 0) * (y - 0) /(30*20) ) ) with pm3d";
+        String plotStrFormat = "1.0/ (2.0 * pi * %f * %f * sqrt(1 - %f**2) )  * exp(-1.0/2.0 * (x**2 / %f**2 + y**2 / %f**2 - 2.0*%f*x * (y - 0) /(%f*%f) ) ) with pm3d";
+        String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mXSigma, mYSigma, mRho, mXSigma, mYSigma);
         p.addPlot(plotStr);
-        //p.addPlot("sin(x)*sin(y)");
-        //p.addPlot(plotStr);
-
         p.plot();
         mRaster =  imageTerminal.getImage();
     }
@@ -76,12 +81,24 @@ public class KalmanPlot extends JPanel implements Runnable {
     public void paint(Graphics g) {
         super.paint(g);
 
-        /*p.set("pm3d", "");
+        mXSigma += 1;
+        if(mXSigma > 100)
+            mXSigma = 20;
+
+        JavaPlot p = new JavaPlot(true);
+        ImageTerminal imageTerminal = new ImageTerminal();
+        p.setTerminal(imageTerminal);
+        p.set("xrange", "[-400.0: 400.0]");
+        p.set("yrange", "[-400.0: 400.0]");
+        p.set("pm3d", "");
         p.set("view", "map");
         p.set("size", "square");
-        p.set("isosamples", "100");*/
-        //p.plot();
-        //mRaster =  imageTerminal.getImage();
+        p.set("isosamples", "100");
+        String plotStrFormat = "1.0/ (2.0 * pi * %f * %f * sqrt(1 - %f**2) )  * exp(-1.0/2.0 * (x**2 / %f**2 + y**2 / %f**2 - 2.0*%f*x * (y - 0) /(%f*%f) ) ) with pm3d";
+        String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mXSigma, mYSigma, mRho, mXSigma, mYSigma);
+        p.addPlot(plotStr);
+        p.plot();
+        mRaster =  imageTerminal.getImage();
 
         Graphics2D g2 = (Graphics2D) g;
         Toolkit.getDefaultToolkit().sync();
