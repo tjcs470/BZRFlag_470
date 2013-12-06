@@ -37,6 +37,7 @@ public class KalmanPlot extends JPanel implements Runnable {
         mXSigma = 30;
         mYSigma = 40;
         mRho = 0.2;
+        mTargetPos = new Vector(0, 0);
 
         JavaPlot p = new JavaPlot(true);
         ImageTerminal imageTerminal = new ImageTerminal();
@@ -47,8 +48,8 @@ public class KalmanPlot extends JPanel implements Runnable {
         p.set("view", "map");
         p.set("size", "square");
         p.set("isosamples", "100");
-        String plotStrFormat = "1.0/ (2.0 * pi * %f * %f * sqrt(1 - %f**2) )  * exp(-1.0/2.0 * (x**2 / %f**2 + y**2 / %f**2 - 2.0*%f*x * (y - 0) /(%f*%f) ) ) with pm3d";
-        String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mXSigma, mYSigma, mRho, mXSigma, mYSigma);
+        String plotStrFormat = "1.0/ (2.0 * pi * %1$f * %2$f * sqrt(1 - %3$f**2) )  * exp(-1.0/2.0 * ((x - %4$f)**2 / %1$f**2 + (y - %5$f)**2 / %2$f**2 - 2.0*%3$f*(x - %4$f) * (y-%5$f) /(%1$f*%2$f) ) ) with pm3d";
+        String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mTargetPos.x(), mTargetPos.y());
         p.addPlot(plotStr);
         p.plot();
         mRaster =  imageTerminal.getImage();
@@ -104,9 +105,9 @@ public class KalmanPlot extends JPanel implements Runnable {
     public void paint(Graphics g) {
         super.paint(g);
 
-        mXSigma += 1;
+        /*mXSigma += 1;
         if(mXSigma > 100)
-            mXSigma = 20;
+            mXSigma = 20;*/
 
         JavaPlot p = new JavaPlot(true);
         ImageTerminal imageTerminal = new ImageTerminal();
@@ -117,8 +118,10 @@ public class KalmanPlot extends JPanel implements Runnable {
         p.set("view", "map");
         p.set("size", "square");
         p.set("isosamples", "100");
-        String plotStrFormat = "1.0/ (2.0 * pi * %f * %f * sqrt(1 - %f**2) )  * exp(-1.0/2.0 * (x**2 / %f**2 + y**2 / %f**2 - 2.0*%f*x * (y - 0) /(%f*%f) ) ) with pm3d";
-        String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mXSigma, mYSigma, mRho, mXSigma, mYSigma);
+        //String plotStrFormat = "1.0/ (2.0 * pi * %1$f * %2$f * sqrt(1 - %3$f**2) )  * exp(-1.0/2.0 * (x**2 / %1$f**2 + y**2 / %2$f**2 - 2.0*%3$f*x * (y - 0) /(%1$f*%2$f) ) ) with pm3d";
+        String plotStrFormat = "1.0/ (2.0 * pi * %1$f * %2$f * sqrt(1 - %3$f**2) )  * exp(-1.0/2.0 * ((x - %4$f)**2 / %1$f**2 + (y - %5$f)**2 / %2$f**2 - 2.0*%3$f*(x - %4$f) * (y-%5$f) /(%1$f*%2$f) ) ) with pm3d";
+        String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mTargetPos.x(), mTargetPos.y());
+        System.out.println(plotStr);
         p.addPlot(plotStr);
         p.plot();
         mRaster =  imageTerminal.getImage();

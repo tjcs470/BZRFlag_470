@@ -44,7 +44,6 @@ public class KalmanAgent {
         {0, 0, 0, 0, 0, 1},
     });
 
-    private RealMatrix mFTranspose = mF.transpose();
     private RealMatrix mH = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0}});
     private RealMatrix mHTranspose = mH.transpose();
 
@@ -55,24 +54,33 @@ public class KalmanAgent {
 
     private RealMatrix kalmanGainMatrix;
 
+    /**Time delta between ticks*/
+    private double mPrevTime;
+
+    private GnuplotRadar radar;
+    private KalmanPlot kalmanPlot;
+
 
     public KalmanAgent(BZRFlag mServer, Tank.TeamColor enemyTankColor) {
         this.mServer = mServer;
         this.enemyTankColor = enemyTankColor;
+        mPrevTime = System.currentTimeMillis();
+        kalmanPlot = new KalmanPlot();
+        radar = new GnuplotRadar(kalmanPlot);
     }
 
     public RealMatrix getLocationAsMatrix() throws IOException {
         for(Tank t : mServer.getOtherTanks()) {
             if(t.getColor() == enemyTankColor) {
                 Vector pos = t.getPos();
-                return new Array2DRowRealMatrix(new double[][]{{pos.x(), pos.y()}});
+                return new Array2DRowRealMatrix(new double[][]{{pos.x()}, {pos.y()}});
             }
         }
         throw new IllegalArgumentException("Could not find tank with color " + enemyTankColor);
     }
 
     public void updateKalmanGainMatrix() {
-        RealMatrix firstChunk = mF.multiply(mE_t).multiply(mFTranspose).add(mE_x);
+        RealMatrix firstChunk = mF.multiply(mE_t).multiply(mF.transpose()).add(mE_x);
 
         firstChunk = firstChunk.multiply(mHTranspose);
 
@@ -89,9 +97,35 @@ public class KalmanAgent {
     }
 
     public RealMatrix getNoiseUpdate() {
-        RealMatrix left = MatrixUtils.createRealIdentityMatrix(4).subtract(kalmanGainMatrix.multiply(mH));
-        RealMatrix right = mF.multiply(mE_t).multiply(mFTranspose).add(mE_x);
+        RealMatrix left = MatrixUtils.createRealIdentityMatrix(6).subtract(kalmanGainMatrix.multiply(mH));
+        RealMatrix right = mF.multiply(mE_t).multiply(mF.transpose()).add(mE_x);
 
         return left.multiply(right);
+    }
+
+    public void updatePhysics(double deltaT) {
+        mF.setEntry(0, 1, deltaT);
+        mF.setEntry(0, 2, deltaT * deltaT / 2.0);
+        mF.setEntry(1, 2, deltaT);
+        mF.setEntry(3, 4, deltaT);
+        mF.setEntry(3, 5, deltaT * deltaT / 2.0);
+        mF.setEntry(4, 5, deltaT);
+    }
+
+    public void tick() throws IOException {
+        double newTime = System.currentTimeMillis();
+        double timeDiffInSec = (newTime - mPrevTime) / 1000;
+        mPrevTime = newTime;
+
+        updateKalmanGainMatrix();
+        updatePhysics(timeDiffInSec);
+        RealMatrix meanUpdate = getMeanUpdate();
+        RealMatrix noiseUpdate = getNoiseUpdate();
+
+        double xSigma = Math.sqrt(noiseUpdate.getEntry(0, 0));
+        double ySimga = Math.sqrt(noiseUpdate.getEntry(3, 3));
+        kalmanPlot.setXSigma(xSigma);
+        kalmanPlot.setYSigma(ySimga);
+        kalmanPlot.setTargetPos(new Vector(meanUpdate.getEntry(0, 0), meanUpdate.getEntry(3, 0)));
     }
 }

@@ -9,9 +9,9 @@ import javax.swing.*;
  * Time: 8:46 PM
  */
 public class GnuplotRadar extends JFrame {
-    public GnuplotRadar() {
+    public GnuplotRadar(KalmanPlot kalmanPlot) {
         //ProbabilityMap probMap = new ProbabilityMap(800);
-        KalmanPlot kalmanPlot = new KalmanPlot();
+        //KalmanPlot kalmanPlot = new KalmanPlot();
         add(kalmanPlot);
         setTitle("Radar");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -22,6 +22,6 @@ public class GnuplotRadar extends JFrame {
     }
 
     public static void main(String[] args) {
-        GnuplotRadar gnuplotRadar = new GnuplotRadar();
+        //GnuplotRadar gnuplotRadar = new GnuplotRadar();
     }
 }
