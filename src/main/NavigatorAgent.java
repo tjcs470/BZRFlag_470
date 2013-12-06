@@ -27,7 +27,6 @@ public class NavigatorAgent {
     private Radar mRadar;
     private final int tankAlignments = 15;
     private Map<Integer, Integer> tankAlignmentCounter = new HashMap<Integer, Integer>(); //gives tank time to align
-    Random gen = new Random();
     private boolean debug = false;
     private int goalTankOneIndex = 0;
     private int goalTankTwoIndex = 1;
@@ -49,9 +48,6 @@ public class NavigatorAgent {
 
     public void sendInCircularMotion(int tankIndex) throws IOException {
         mServer.speed(tankIndex, 1.0);
-//        double angle = -.1 + .02 * tankIndex;
-//        if(angle == 0) angle = .01;
-//        System.out.println(angle);
         if(tankIndex % 2 == 0) {
             mServer.angVel(tankIndex, .07);
         } else {
@@ -134,10 +130,8 @@ public class NavigatorAgent {
     }
 
     private SeekGoalCircularPF getGoalForTank(NavigatorTank t) {
-        //Point2D desiredLocation = t.getDesiredLocation(tankGoalMap.get(t.getIndex()));
         Point2D desiredLocation = mProbabilityMap.getUnexploredLoc();
         mProbabilityMap.highlightGoal((int) desiredLocation.x(), (int) desiredLocation.y());
-//        System.out.println("Tank[" + t.getIndex() + "] goal: " + desiredLocation);
         return new SeekGoalCircularPF(1, desiredLocation, 30, 1);
     }
 
