@@ -96,18 +96,18 @@ public class KalmanAgent {
         kalmanGainMatrix = firstChunk.multiply(MatrixUtils.blockInverse(secondChunk, 0));
     }
 
-    public RealMatrix getMeanUpdate() throws IOException {
+    public void getMeanUpdate() throws IOException {
         RealMatrix first = mF.multiply(mU_t);
         RealMatrix inner = getLocationAsMatrixOfEnemyTank().subtract(mH.multiply(mF).multiply(mU_t));
 
-        return first.add(kalmanGainMatrix.multiply(inner));
+        mU_t = first.add(kalmanGainMatrix.multiply(inner));
     }
 
-    public RealMatrix getNoiseUpdate() {
+    public void getNoiseUpdate() {
         RealMatrix left = MatrixUtils.createRealIdentityMatrix(6).subtract(kalmanGainMatrix.multiply(mH));
         RealMatrix right = mF.multiply(mE_t).multiply(mF.transpose()).add(mE_x);
 
-        return left.multiply(right);
+        mE_t = left.multiply(right);
     }
 
     public void updatePhysics(double deltaT) {
@@ -128,21 +128,23 @@ public class KalmanAgent {
 
         updateKalmanGainMatrix();
         updatePhysics(timeDiffInSec);
-        RealMatrix meanUpdate = getMeanUpdate();
-        RealMatrix noiseUpdate = getNoiseUpdate();
+        long current = System.currentTimeMillis();
+        getMeanUpdate();
+        getNoiseUpdate();
 
-        double xSigma = Math.sqrt(noiseUpdate.getEntry(0, 0));
-        double ySimga = Math.sqrt(noiseUpdate.getEntry(3, 3));
+        double xSigma = Math.sqrt(mE_t.getEntry(0, 0));
+        double ySimga = Math.sqrt(mE_t.getEntry(3, 3));
         kalmanPlot.setXSigma(xSigma);
         kalmanPlot.setYSigma(ySimga);
-        kalmanPlot.setTargetPos(new Vector(meanUpdate.getEntry(0, 0), meanUpdate.getEntry(3, 0)));
+        kalmanPlot.setTargetPos(new Vector(mU_t.getEntry(0, 0), mU_t.getEntry(3, 0)));
 
-        RealMatrix meanPrediction = mF.multiply(meanUpdate);
+        RealMatrix meanPrediction = mF.multiply(mU_t);
         Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
         double targetAngle = Math.atan2(targetPosition.y() - myTank.getPos().y(), targetPosition.x() - myTank.getPos().x());
 
         mServer.angVel(0, controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec));
 
         mServer.shoot(0);
+        System.out.println("Time " + (System.currentTimeMillis() - current));
     }
 }
