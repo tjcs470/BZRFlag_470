@@ -539,7 +539,7 @@ public class BZRFlag {
 
 
     public static void main(String args[]) throws IOException, InterruptedException {
-        JavaPlot p = new JavaPlot();
+        /*JavaPlot p = new JavaPlot();
         //p.set("term", "png");
         //p.set("output", "/home/ty/MyStuff/cs470/plot/test.png");
         ImageTerminal imageTerminal = new ImageTerminal();
@@ -552,7 +552,7 @@ public class BZRFlag {
         System.out.println(image.getWidth());
         System.out.println(image.getHeight());
 
-        GnuplotRadar gnuplotRadar = new GnuplotRadar();
+        GnuplotRadar gnuplotRadar = new GnuplotRadar();*/
 
         /*for(int i = 0; i < 5; i++)
         {
@@ -569,8 +569,12 @@ public class BZRFlag {
 
         //BZRFlag blueServer = new BZRFlag("localhost", 60298);
         //blueServer.handshake();
-        BZRFlag blueServer = new BZRFlag("localhost", 54707);
+        BZRFlag blueServer = new BZRFlag("localhost", 44028);
         blueServer.handshake();
+        WildAgent wildAgent = new WildAgent(blueServer);
+        while(true) {
+            wildAgent.tick();
+        }
 //        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
 
 //        BZRFlag purpleServer = new BZRFlag("localhost", 42237);
