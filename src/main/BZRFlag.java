@@ -569,10 +569,18 @@ public class BZRFlag {
 
         //BZRFlag blueServer = new BZRFlag("localhost", 60298);
         //blueServer.handshake();
-        BZRFlag blueServer = new BZRFlag("localhost", 60120);
+
+
+        BZRFlag blueServer = new BZRFlag("localhost", 50966);
         blueServer.handshake();
+        BZRFlag greenServer = new BZRFlag("localhost", 52171);
+        greenServer.handshake();
+        greenServer.speed(0, 1);
+
+
+
         //WildAgent wildAgent = new WildAgent(blueServer);
-        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.GREEN);
+        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.RED);
         while(true) {
             //wildAgent.tick();
             kalmanAgent.tick();
@@ -583,8 +591,6 @@ public class BZRFlag {
 //        purpleServer.handshake();
 //        purpleServer.sendAllTanksInMotion(Tank.TeamColor.PURPLE);
 
-//        BZRFlag greenServer = new BZRFlag("localhost", 41485);
-//        greenServer.handshake();
 //        greenServer.sendAllTanksInMotion(Tank.TeamColor.GREEN);
 
 //        BZRFlag redServer = new BZRFlag("localhost", 38570);

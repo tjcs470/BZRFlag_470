@@ -121,7 +121,7 @@ public class KalmanPlot extends JPanel implements Runnable {
         //String plotStrFormat = "1.0/ (2.0 * pi * %1$f * %2$f * sqrt(1 - %3$f**2) )  * exp(-1.0/2.0 * (x**2 / %1$f**2 + y**2 / %2$f**2 - 2.0*%3$f*x * (y - 0) /(%1$f*%2$f) ) ) with pm3d";
         String plotStrFormat = "1.0/ (2.0 * pi * %1$f * %2$f * sqrt(1 - %3$f**2) )  * exp(-1.0/2.0 * ((x - %4$f)**2 / %1$f**2 + (y - %5$f)**2 / %2$f**2 - 2.0*%3$f*(x - %4$f) * (y-%5$f) /(%1$f*%2$f) ) ) with pm3d";
         String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mTargetPos.x(), mTargetPos.y());
-        System.out.println(plotStr);
+//        System.out.println(plotStr);
         p.addPlot(plotStr);
         p.plot();
         mRaster =  imageTerminal.getImage();

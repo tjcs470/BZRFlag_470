@@ -47,7 +47,7 @@ public class KalmanAgent {
     private RealMatrix mH = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0}});
     private RealMatrix mHTranspose = mH.transpose();
 
-    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{25, 0}, {0, 25}});
+    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{0, 0}, {0, 0}});
 
     private BZRFlag mServer;
     private Tank.TeamColor enemyTankColor;
@@ -57,26 +57,33 @@ public class KalmanAgent {
     /**Time delta between ticks*/
     private double mPrevTime;
 
-    private GnuplotRadar radar;
     private KalmanPlot kalmanPlot;
 
 
-    public KalmanAgent(BZRFlag mServer, Tank.TeamColor enemyTankColor) {
+    private PDAngVelController controller = new PDAngVelController(.8, .2);
+
+
+    public KalmanAgent(BZRFlag mServer, Tank.TeamColor enemyTankColor) throws IOException {
         this.mServer = mServer;
         this.enemyTankColor = enemyTankColor;
         mPrevTime = System.currentTimeMillis();
         kalmanPlot = new KalmanPlot();
-        radar = new GnuplotRadar(kalmanPlot);
+        new GnuplotRadar(kalmanPlot);
     }
 
-    public RealMatrix getLocationAsMatrix() throws IOException {
+
+    public RealMatrix getLocationAsMatrixForColor(Tank.TeamColor color) throws IOException {
         for(Tank t : mServer.getOtherTanks()) {
-            if(t.getColor() == enemyTankColor) {
+            if(t.getColor() == color) {
                 Vector pos = t.getPos();
                 return new Array2DRowRealMatrix(new double[][]{{pos.x()}, {pos.y()}});
             }
         }
-        throw new IllegalArgumentException("Could not find tank with color " + enemyTankColor);
+        throw new IllegalArgumentException("Could not find tank with color " + color);
+    }
+
+    public RealMatrix getLocationAsMatrixOfEnemyTank() throws IOException {
+        return getLocationAsMatrixForColor(enemyTankColor);
     }
 
     public void updateKalmanGainMatrix() {
@@ -91,7 +98,7 @@ public class KalmanAgent {
 
     public RealMatrix getMeanUpdate() throws IOException {
         RealMatrix first = mF.multiply(mU_t);
-        RealMatrix inner = getLocationAsMatrix().subtract(mH.multiply(mF).multiply(mU_t));
+        RealMatrix inner = getLocationAsMatrixOfEnemyTank().subtract(mH.multiply(mF).multiply(mU_t));
 
         return first.add(kalmanGainMatrix.multiply(inner));
     }
@@ -117,6 +124,8 @@ public class KalmanAgent {
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
 
+        Tank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+
         updateKalmanGainMatrix();
         updatePhysics(timeDiffInSec);
         RealMatrix meanUpdate = getMeanUpdate();
@@ -127,5 +136,13 @@ public class KalmanAgent {
         kalmanPlot.setXSigma(xSigma);
         kalmanPlot.setYSigma(ySimga);
         kalmanPlot.setTargetPos(new Vector(meanUpdate.getEntry(0, 0), meanUpdate.getEntry(3, 0)));
+
+        RealMatrix meanPrediction = mF.multiply(meanUpdate);
+        Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
+        double targetAngle = Math.atan2(targetPosition.y() - myTank.getPos().y(), targetPosition.x() - myTank.getPos().x());
+
+        mServer.angVel(0, controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec));
+
+        mServer.shoot(0);
     }
 }
