@@ -27,6 +27,8 @@ public class KalmanPlot extends JPanel implements Runnable {
     private double mYSigma;
     /** Rho */
     private double mRho;
+    /** The position of the target */
+    private Vector mTargetPos;
 
     /**
      * Constructor
@@ -50,6 +52,27 @@ public class KalmanPlot extends JPanel implements Runnable {
         p.addPlot(plotStr);
         p.plot();
         mRaster =  imageTerminal.getImage();
+    }
+
+    /**
+     * Sets Sigma_x
+     */
+    public void setXSigma(double XSigma) {
+        mXSigma = XSigma;
+    }
+
+    /**
+     * Sets Sigma_y
+     */
+    public void setYSigma(double YSigma) {
+        mYSigma = YSigma;
+    }
+
+    /**
+     * Sets the target position
+     */
+    public void setTargetPos(Vector targetPos) {
+        mTargetPos = targetPos;
     }
 
     /**
