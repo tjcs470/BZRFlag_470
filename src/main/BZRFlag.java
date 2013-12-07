@@ -571,16 +571,27 @@ public class BZRFlag {
         //blueServer.handshake();
 
 
-        BZRFlag blueServer = new BZRFlag("localhost", 34535);
+        BZRFlag blueServer = new BZRFlag("localhost", 47791);
         blueServer.handshake();
-        BZRFlag greenServer = new BZRFlag("localhost",  51403);
+
+        /*BZRFlag greenServer = new BZRFlag("localhost", 56751);
         greenServer.handshake();
         greenServer.speed(0, 1);
+        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.GREEN);*/
 
+        /*BZRFlag purpleServer = new BZRFlag("localhost", 58276);
+        purpleServer.handshake();
+        purpleServer.speed(0, 1);
+        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.PURPLE);*/
+
+        BZRFlag redServer = new BZRFlag("localhost", 48081);
+        redServer.handshake();
+        redServer.speed(0, 1);
+        Thread.sleep(1000);
+        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.RED);
 
 
         //WildAgent wildAgent = new WildAgent(blueServer);
-        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.PURPLE);
         while(true) {
             //wildAgent.tick();
             kalmanAgent.tick();

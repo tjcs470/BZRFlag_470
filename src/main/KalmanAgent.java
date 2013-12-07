@@ -1,6 +1,8 @@
 package main;
 
+import ServerResponse.MyTank;
 import ServerResponse.Tank;
+import math.geom2d.Point2D;
 import org.apache.commons.math3.linear.AnyMatrix;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -47,7 +49,7 @@ public class KalmanAgent {
     private RealMatrix mH = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0}});
     private RealMatrix mHTranspose = mH.transpose();
 
-    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{0, 0}, {0, 0}});
+    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{25, 0}, {0, 25}});
 
     private BZRFlag mServer;
     private Tank.TeamColor enemyTankColor;
@@ -119,7 +121,7 @@ public class KalmanAgent {
         mF.setEntry(4, 5, deltaT);
     }
 
-    public void tick() throws IOException {
+    public void tick() throws IOException, InterruptedException {
         double newTime = System.currentTimeMillis();
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
@@ -138,13 +140,81 @@ public class KalmanAgent {
         kalmanPlot.setYSigma(ySimga);
         kalmanPlot.setTargetPos(new Vector(mU_t.getEntry(0, 0), mU_t.getEntry(3, 0)));
 
+        leadAndShoot();
+
+        /*Vector currTargetPos = getPos(mU_t);
+        double distToTarget = Point2D.distance(currTargetPos,myTank.getPos());
+        double bulletTravelTime = distToTarget / 100.0;
+
+        updatePhysics(5 * timeDiffInSec + bulletTravelTime);
         RealMatrix meanPrediction = mF.multiply(mU_t);
         Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
-        double targetAngle = Math.atan2(targetPosition.y() - myTank.getPos().y(), targetPosition.x() - myTank.getPos().x());
+        double deltaY = targetPosition.y() - myTank.getPos().y();
+        double deltaX = targetPosition.x() - myTank.getPos().x();
+        double targetAngle = Math.atan2(deltaY, deltaX);
 
         mServer.angVel(0, controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec));
 
         mServer.shoot(0);
-        System.out.println("Time " + (System.currentTimeMillis() - current));
+        Thread.sleep(2000);
+        mServer.shoot(0);
+        System.out.println("Time " + (System.currentTimeMillis() - current));*/
+    }
+
+    /**
+     * Returns the position in the state vector
+     * @return
+     */
+    public Vector getPos(RealMatrix stateVector) {
+        return new Vector(stateVector.getEntry(0, 0), stateVector.getEntry(3,0));
+    }
+
+    /**
+     * Gets a point in front of the tank
+     */
+    public void leadAndShoot() throws IOException, InterruptedException {
+        double timeToPrepareStart = System.currentTimeMillis();
+
+        double waitTime = 5.0;
+
+        updatePhysics(waitTime);
+        RealMatrix meanPrediction = mF.multiply(mU_t);
+
+        Tank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+
+        Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
+        double deltaY = targetPosition.y() - myTank.getPos().y();
+        double deltaX = targetPosition.x() - myTank.getPos().x();
+        double targetAngle = Math.atan2(deltaY, deltaX);
+
+        // line up
+        double prevTime = mPrevTime;
+        while(true) {
+            double newTime = System.currentTimeMillis();
+            double timeDiffInSec = (newTime - prevTime) / 1000;
+            prevTime = newTime;
+
+            myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+            double angAccel = controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec);
+            mServer.angVel(0, angAccel);
+            if(Math.abs(angAccel) < 0.1)
+                break;
+        }
+
+        // calculate bullet travel time
+        double distToTarget = Point2D.distance(targetPosition, myTank.getPos());
+        double bulletTravelTime = distToTarget / 100.0;
+
+        double timeToPrepare = (System.currentTimeMillis() - timeToPrepareStart) / 1000;
+
+        waitTime -= bulletTravelTime;
+        waitTime -= timeToPrepare;
+
+        System.out.println(waitTime);
+        long waitTimeMilli = (long) (waitTime / 1000);
+        System.out.println(waitTimeMilli);
+        if(waitTimeMilli > 0)
+            Thread.sleep(waitTimeMilli);
+        mServer.shoot(0);
     }
 }
