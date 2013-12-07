@@ -32,4 +32,11 @@ public class Base {
     public ArrayList<Point2D> getCorners() {
         return corners;
     }
+
+    /**
+     * Get center
+     */
+    public Point2D getCenter() {
+        return Point2D.centroid(corners);
+    }
 }

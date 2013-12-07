@@ -9,6 +9,7 @@ import potentialFields.circular.SeekGoalCircularPF;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,6 +35,8 @@ public class WildAgent {
     private double mPrevTime;
     /**Elapsed time*/
     private double mElapsedTime;
+    /**Random generator*/
+    private Random mRand;
 
     /**
      * Constructor
@@ -46,8 +49,9 @@ public class WildAgent {
         mMY_COLOR = serverConsts.team;
         mPrevTime =  System.currentTimeMillis();
         mPdController = new PDAngVelController(0.2, 0.8);
-        updateRandPf();
+        //updateRandPf();
         mElapsedTime = 0.0;
+        mRand = new Random();
     }
 
     /**
@@ -56,31 +60,33 @@ public class WildAgent {
     public void tick() throws IOException {
         ArrayList<ServerResponse.MyTank> myTanks = mServer.getMyTanks(mMY_COLOR);
         ServerResponse.MyTank myTank = myTanks.get(mWILD_TANK);
-        double goalAng = mRandomPf.getAngleToPotentialField(myTank.getPos());
+        //double goalAng = mRandomPf.getAngleToPotentialField(myTank.getPos());
 
         double newTime = System.currentTimeMillis();
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
-        double angAccel = mPdController.getAcceleration(goalAng, myTank.getAngle(), timeDiffInSec);
+        //double angAccel = mPdController.getAcceleration(goalAng, myTank.getAngle(), timeDiffInSec);
 
         if(mElapsedTime > 5) {
-            updateRandPf();
+            //updateRandPf();
+            mServer.angVel(mWILD_TANK, mRand.nextDouble());
+            mServer.speed(mWILD_TANK, mRand.nextDouble());
             mElapsedTime = 0.0;
         }
         else {
             mElapsedTime += timeDiffInSec;
         }
 
-        double targetVel = myTank.getAngVel() + angAccel;
-        mServer.angVel(mWILD_TANK, targetVel);
+        //double targetVel = myTank.getAngVel() + angAccel;
+        //mServer.angVel(mWILD_TANK, targetVel);
     }
 
     /**
      * Gets a random location on the map
      */
-    private void updateRandPf() {
+    /*private void updateRandPf() {
         double randX = (Math.random() * mWORLD_SIZE) - (mWORLD_SIZE / 2.0);
         double randY = (Math.random() * mWORLD_SIZE) - (mWORLD_SIZE / 2.0);
         mRandomPf = new SeekGoalCircularPF(1, new Vector(randX, randY), 30, 1);
-    }
+    }*/
 }

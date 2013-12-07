@@ -31,10 +31,10 @@ public class KalmanAgent {
     private RealMatrix mE_x = new Array2DRowRealMatrix(new double[][]
             {   {.1, 0, 0, 0, 0, 0 },
                 {0, .1, 0, 0, 0, 0 },
-                {0, 0, 100, 0, 0, 0},
+                {0, 0, .1, 0, 0, 0},
                 {0, 0, 0, .1, 0, 0 },
                 {0, 0, 0, 0, .1, 0 },
-                {0, 0, 0, 0, 0, 100},
+                {0, 0, 0, 0, 0, .1},
             });
 
     private RealMatrix mF = new Array2DRowRealMatrix(new double[][]
@@ -61,6 +61,8 @@ public class KalmanAgent {
 
     private KalmanPlot kalmanPlot;
 
+    private int obsvCounter;
+
 
     private PDAngVelController controller = new PDAngVelController(.8, .2);
 
@@ -71,13 +73,17 @@ public class KalmanAgent {
         mPrevTime = System.currentTimeMillis();
         kalmanPlot = new KalmanPlot();
         new GnuplotRadar(kalmanPlot);
+        obsvCounter = 0;
     }
 
 
     public RealMatrix getLocationAsMatrixForColor(Tank.TeamColor color) throws IOException {
         for(Tank t : mServer.getOtherTanks()) {
             if(t.getColor() == color) {
-                Vector pos = t.getPos();
+                Point2D pos = t.getPos();
+                if(t.getStatus() == Tank.TankStatus.DEAD) {
+                    pos = mServer.getBases().get(color).getCenter();
+                }
                 return new Array2DRowRealMatrix(new double[][]{{pos.x()}, {pos.y()}});
             }
         }
@@ -126,11 +132,10 @@ public class KalmanAgent {
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
 
-        Tank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+        System.out.println(timeDiffInSec);
 
         updateKalmanGainMatrix();
         updatePhysics(timeDiffInSec);
-        long current = System.currentTimeMillis();
         getMeanUpdate();
         getNoiseUpdate();
 
@@ -139,8 +144,14 @@ public class KalmanAgent {
         kalmanPlot.setXSigma(xSigma);
         kalmanPlot.setYSigma(ySimga);
         kalmanPlot.setTargetPos(new Vector(mU_t.getEntry(0, 0), mU_t.getEntry(3, 0)));
+        //obsvCounter += 1;
 
         leadAndShoot();
+
+        /*if(obsvCounter == 2) {
+            leadAndShoot();
+            obsvCounter = 0;
+        }*/
 
         /*Vector currTargetPos = getPos(mU_t);
         double distToTarget = Point2D.distance(currTargetPos,myTank.getPos());
@@ -210,11 +221,11 @@ public class KalmanAgent {
         waitTime -= bulletTravelTime;
         waitTime -= timeToPrepare;
 
-        System.out.println(waitTime);
-        long waitTimeMilli = (long) (waitTime / 1000);
-        System.out.println(waitTimeMilli);
-        if(waitTimeMilli > 0)
-            Thread.sleep(waitTimeMilli);
+        //System.out.println(waitTime);
+        long waitTimeMilli = (long) (waitTime * 1000);
+        //System.out.println(waitTimeMilli);
+        if(waitTimeMilli > 10)
+            Thread.sleep(waitTimeMilli - 10);
         mServer.shoot(0);
     }
 }
