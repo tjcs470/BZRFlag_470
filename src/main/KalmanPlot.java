@@ -123,7 +123,7 @@ public class KalmanPlot extends JPanel implements Runnable {
         String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mTargetPos.x(), mTargetPos.y());
 //        System.out.println(plotStr);
         p.addPlot(plotStr);
-        p.plot();
+        //p.plot();
         mRaster =  imageTerminal.getImage();
 
         Graphics2D g2 = (Graphics2D) g;

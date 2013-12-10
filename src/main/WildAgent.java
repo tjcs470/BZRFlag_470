@@ -69,8 +69,8 @@ public class WildAgent {
 
         if(mElapsedTime > 5) {
             //updateRandPf();
-            mServer.angVel(mWILD_TANK, mRand.nextDouble());
-            mServer.speed(mWILD_TANK, mRand.nextDouble());
+            mServer.angVel(mWILD_TANK, 2.0 * mRand.nextDouble() - 1.0);
+            mServer.speed(mWILD_TANK, 2.0 * mRand.nextDouble() - 1.0);
             mElapsedTime = 0.0;
         }
         else {

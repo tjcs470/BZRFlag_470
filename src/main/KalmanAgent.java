@@ -31,10 +31,10 @@ public class KalmanAgent {
     private RealMatrix mE_x = new Array2DRowRealMatrix(new double[][]
             {   {.1, 0, 0, 0, 0, 0 },
                 {0, .1, 0, 0, 0, 0 },
-                {0, 0, .1, 0, 0, 0},
+                {0, 0, 100, 0, 0, 0},
                 {0, 0, 0, .1, 0, 0 },
                 {0, 0, 0, 0, .1, 0 },
-                {0, 0, 0, 0, 0, .1},
+                {0, 0, 0, 0, 0, 100},
             });
 
     private RealMatrix mF = new Array2DRowRealMatrix(new double[][]
@@ -49,7 +49,7 @@ public class KalmanAgent {
     private RealMatrix mH = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0}});
     private RealMatrix mHTranspose = mH.transpose();
 
-    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{25, 0}, {0, 25}});
+    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{0, 0}, {0, 0}});
 
     private BZRFlag mServer;
     private Tank.TeamColor enemyTankColor;
@@ -64,7 +64,7 @@ public class KalmanAgent {
     private int obsvCounter;
 
 
-    private PDAngVelController controller = new PDAngVelController(.8, .2);
+    private PDAngVelController controller = new PDAngVelController(.1, .2);
 
 
     public KalmanAgent(BZRFlag mServer, Tank.TeamColor enemyTankColor) throws IOException {
@@ -127,12 +127,13 @@ public class KalmanAgent {
         mF.setEntry(4, 5, deltaT);
     }
 
+    int nObvs = 0;
     public void tick() throws IOException, InterruptedException {
         double newTime = System.currentTimeMillis();
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
 
-        System.out.println(timeDiffInSec);
+        //System.out.println(timeDiffInSec);
 
         updateKalmanGainMatrix();
         updatePhysics(timeDiffInSec);
@@ -144,14 +145,13 @@ public class KalmanAgent {
         kalmanPlot.setXSigma(xSigma);
         kalmanPlot.setYSigma(ySimga);
         kalmanPlot.setTargetPos(new Vector(mU_t.getEntry(0, 0), mU_t.getEntry(3, 0)));
-        //obsvCounter += 1;
+
+        /*if(nObvs < 100) {
+            nObvs += 1;
+            return;
+        }*/
 
         leadAndShoot();
-
-        /*if(obsvCounter == 2) {
-            leadAndShoot();
-            obsvCounter = 0;
-        }*/
 
         /*Vector currTargetPos = getPos(mU_t);
         double distToTarget = Point2D.distance(currTargetPos,myTank.getPos());
@@ -186,12 +186,13 @@ public class KalmanAgent {
     public void leadAndShoot() throws IOException, InterruptedException {
         double timeToPrepareStart = System.currentTimeMillis();
 
-        double waitTime = 5.0;
+        double waitTime = 7.0;
 
         updatePhysics(waitTime);
         RealMatrix meanPrediction = mF.multiply(mU_t);
+        System.out.println("Predicted: " + meanPrediction.toString());
 
-        Tank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+        MyTank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
 
         Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
         double deltaY = targetPosition.y() - myTank.getPos().y();
@@ -206,9 +207,10 @@ public class KalmanAgent {
             prevTime = newTime;
 
             myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+            double currAngVel = myTank.getAngVel();
             double angAccel = controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec);
-            mServer.angVel(0, angAccel);
-            if(Math.abs(angAccel) < 0.1)
+            mServer.angVel(0, currAngVel + angAccel);
+            if(Math.abs(angAccel) < 0.01 && Math.abs(myTank.getAngle() - targetAngle) < 0.01)
                 break;
         }
 
@@ -218,14 +220,21 @@ public class KalmanAgent {
 
         double timeToPrepare = (System.currentTimeMillis() - timeToPrepareStart) / 1000;
 
+        System.out.println("Bullet travel time: " + bulletTravelTime);
+        System.out.println("Time to prepare: " + timeToPrepare);
+
         waitTime -= bulletTravelTime;
         waitTime -= timeToPrepare;
 
         //System.out.println(waitTime);
         long waitTimeMilli = (long) (waitTime * 1000);
-        //System.out.println(waitTimeMilli);
-        if(waitTimeMilli > 10)
-            Thread.sleep(waitTimeMilli - 10);
+        System.out.println("How long we should wait: " + waitTimeMilli);
+        System.out.println("Before wait: " + (System.currentTimeMillis() - timeToPrepareStart));
+        if(waitTimeMilli > 0)
+            Thread.sleep(waitTimeMilli);
+
         mServer.shoot(0);
+        System.out.println("End: " + (System.currentTimeMillis() - timeToPrepareStart));
+        System.out.println("");
     }
 }

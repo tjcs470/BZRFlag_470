@@ -574,28 +574,32 @@ public class BZRFlag {
         BZRFlag blueServer = new BZRFlag("localhost", 47791);
         blueServer.handshake();
 
-        /*BZRFlag greenServer = new BZRFlag("localhost", 56751);
-        greenServer.handshake();
-        greenServer.speed(0, 1);
-        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.GREEN);*/
-
-        /*BZRFlag purpleServer = new BZRFlag("localhost", 58276);
+//        BZRFlag greenServer = new BZRFlag("localhost", 56751);
+//        greenServer.handshake();
+//        greenServer.speed(0, 1);
+//        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.GREEN);
+//
+//        BZRFlag purpleServer = new BZRFlag("localhost", 58276);
+//        purpleServer.handshake();
+//        purpleServer.speed(0, 0.5);
+//        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.PURPLE);
+//
+        BZRFlag purpleServer = new BZRFlag("localhost", 48081);
         purpleServer.handshake();
         purpleServer.speed(0, 0.5);
-        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.PURPLE);*/
-
-        BZRFlag redServer = new BZRFlag("localhost", 48081);
-        redServer.handshake();
-        WildAgent wildAgent = new WildAgent(redServer);
-        //redServer.handshake();
-        //redServer.speed(0, 0.5);
-        Thread.sleep(1000);
         KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.RED);
 
+        /*BZRFlag redServer = new BZRFlag("localhost", 48081);
+        redServer.handshake();
+        WildAgent wildAgent = new WildAgent(redServer);*/
+        //redServer.handshake();
+        //redServer.speed(0, 0.5);
+        /*Thread.sleep(1000);
+        KalmanAgent kalmanAgent = new KalmanAgent(blueServer, Tank.TeamColor.RED);*/
 
         //WildAgent wildAgent = new WildAgent(blueServer);
         while(true) {
-            wildAgent.tick();
+            //wildAgent.tick();
             kalmanAgent.tick();
         }
 //        blueServer.sendAllTanksInMotion(Tank.TeamColor.BLUE);
