@@ -49,7 +49,7 @@ public class KalmanAgent {
     private RealMatrix mH = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0}});
     private RealMatrix mHTranspose = mH.transpose();
 
-    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{0, 0}, {0, 0}});
+    private RealMatrix mE_z = new Array2DRowRealMatrix(new double[][] {{25, 0}, {0, 25}});
 
     private BZRFlag mServer;
     private Tank.TeamColor enemyTankColor;
@@ -64,7 +64,7 @@ public class KalmanAgent {
     private int obsvCounter;
 
 
-    private PDAngVelController controller = new PDAngVelController(.1, .2);
+    private PDAngVelController controller = new PDAngVelController(.8, .2);
 
 
     public KalmanAgent(BZRFlag mServer, Tank.TeamColor enemyTankColor) throws IOException {
@@ -140,36 +140,37 @@ public class KalmanAgent {
         getMeanUpdate();
         getNoiseUpdate();
 
-        double xSigma = Math.sqrt(mE_t.getEntry(0, 0));
-        double ySimga = Math.sqrt(mE_t.getEntry(3, 3));
+        double xSigma = Math.sqrt(1.0 / mE_t.getEntry(0, 0));
+        double ySigma = Math.sqrt(1.0 / mE_t.getEntry(3, 3));
         kalmanPlot.setXSigma(xSigma);
-        kalmanPlot.setYSigma(ySimga);
+        kalmanPlot.setYSigma(ySigma);
         kalmanPlot.setTargetPos(new Vector(mU_t.getEntry(0, 0), mU_t.getEntry(3, 0)));
 
-        /*if(nObvs < 100) {
-            nObvs += 1;
-            return;
-        }*/
+        System.out.println("Sigma_t: " + mE_t.toString());
 
-        leadAndShoot();
+        ///leadAndShoot();
 
-        /*Vector currTargetPos = getPos(mU_t);
+        MyTank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
+        Vector currTargetPos = getPos(mU_t);
         double distToTarget = Point2D.distance(currTargetPos,myTank.getPos());
         double bulletTravelTime = distToTarget / 100.0;
 
-        updatePhysics(5 * timeDiffInSec + bulletTravelTime);
+        updatePhysics(bulletTravelTime);
         RealMatrix meanPrediction = mF.multiply(mU_t);
         Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
         double deltaY = targetPosition.y() - myTank.getPos().y();
         double deltaX = targetPosition.x() - myTank.getPos().x();
         double targetAngle = Math.atan2(deltaY, deltaX);
 
-        mServer.angVel(0, controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec));
+        if(Math.abs(myTank.getAngle() - targetAngle) < 0.05)
+            mServer.shoot(0);
 
-        mServer.shoot(0);
+        mServer.angVel(0, 1.1 * controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec));
+
+        /*mServer.shoot(0);
         Thread.sleep(2000);
-        mServer.shoot(0);
-        System.out.println("Time " + (System.currentTimeMillis() - current));*/
+        mServer.shoot(0);*/
+        //System.out.println("Time " + (System.currentTimeMillis() - current));
     }
 
     /**

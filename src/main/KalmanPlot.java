@@ -36,7 +36,7 @@ public class KalmanPlot extends JPanel implements Runnable {
     public KalmanPlot() {
         mXSigma = 30;
         mYSigma = 40;
-        mRho = 0.2;
+        mRho = 0.0;
         mTargetPos = new Vector(0, 0);
 
         JavaPlot p = new JavaPlot(true);
@@ -123,7 +123,7 @@ public class KalmanPlot extends JPanel implements Runnable {
         String plotStr = String.format(plotStrFormat, mXSigma, mYSigma, mRho, mTargetPos.x(), mTargetPos.y());
 //        System.out.println(plotStr);
         p.addPlot(plotStr);
-        //p.plot();
+        p.plot();
         mRaster =  imageTerminal.getImage();
 
         Graphics2D g2 = (Graphics2D) g;
