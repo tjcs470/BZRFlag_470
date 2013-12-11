@@ -135,46 +135,42 @@ public class KalmanAgent {
     /**
      * Outputs the sigma values
      */
-    private ArrayList<Double> prevXPosSigma = new ArrayList<Double>();
-    private ArrayList<Double> prevYPosSigma = new ArrayList<Double>();
-    private ArrayList<Double> prevXVelSigma = new ArrayList<Double>();
-    private ArrayList<Double> prevYVelSigma = new ArrayList<Double>();
-    private ArrayList<Double> prevXAccelSigma = new ArrayList<Double>();
-    private ArrayList<Double> prevYAccelSigma = new ArrayList<Double>();;
-
-    /**
-     * The maximum difference between
-     * @param nums
-     */
-    private double percentMaxDiff(ArrayList<Double> nums) {
-        if(nums.size() == 0)
-            return 1.0;
-
-        Collections.sort(nums);
-        Double min = nums.get(0);
-        Double max = nums.get(nums.size() - 1);
-        return (1.0 - (min / max));
-    }
+    private SigmaTracker xPosSigmaSamples = new SigmaTracker();
+    private SigmaTracker yPosSigmaSamples = new SigmaTracker();
+    private SigmaTracker xVelSigmaSamples = new SigmaTracker();
+    private SigmaTracker yVelSigmaSamples = new SigmaTracker();
+    private SigmaTracker xAccelSigmaSamples = new SigmaTracker();
+    private SigmaTracker yAccelSigmaSamples = new SigmaTracker();;
 
     public void printSigmaValues() throws IOException {
         double xPosSigma = Math.sqrt(1.0 / mE_t.getEntry(0, 0));
+        xPosSigmaSamples.recordSigma(xPosSigma);
+        if(xPosSigmaSamples.converged())
+            System.out.println("X converged");
+
         double xVelSigma = Math.sqrt(1.0 / mE_t.getEntry(1, 1));
+        xVelSigmaSamples.recordSigma(xVelSigma);
+
         double xAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(2, 2));
+        xAccelSigmaSamples.recordSigma(xAccelSigma);
+
         double yPosSigma = Math.sqrt(1.0 / mE_t.getEntry(3, 3));
+        yPosSigmaSamples.recordSigma(yPosSigma);
+
         double yVelSigma = Math.sqrt(1.0 / mE_t.getEntry(4, 4));
+        yVelSigmaSamples.recordSigma(yVelSigma);
+
         double yAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(5, 5));
+        yAccelSigmaSamples.recordSigma(yAccelSigma);
 
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("x_position", true)));
-        out.println(mElapsedTime + ", " + xPosSigma);
-        out.close();
 
-        System.out.println("x-position-sigma: " + xPosSigma);
+        /*System.out.println("x-position-sigma: " + xPosSigma);
         System.out.println("y-position-sigma: " + yPosSigma);
         System.out.println("x-velocity-sigma: " + xVelSigma);
         System.out.println("y-velocity-sigma: " + yVelSigma);
         System.out.println("x-acceleration-sigma: " + xAccelSigma);
         System.out.println("y-acceleration-sigma: " + yAccelSigma);
-        System.out.println("");
+        System.out.println("");*/
     }
 
     int nObvs = 0;

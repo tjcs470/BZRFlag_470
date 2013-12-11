@@ -39,6 +39,9 @@ public class SigmaTracker {
     }
 
     boolean converged() {
+        if(mSigmaSamples.size() < MAX_SAMPLES)
+            return false;
+
         Double percentDiff = 1.0 - (minSigma() / maxSigma());
         return (percentDiff < 0.1);
     }
