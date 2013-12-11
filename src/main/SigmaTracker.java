@@ -43,7 +43,7 @@ public class SigmaTracker {
             return false;
 
         Double percentDiff = 1.0 - (minSigma() / maxSigma());
-        return (percentDiff < 0.05);
+        return (percentDiff < 0.1);
     }
 
     public int getTotalRecorded() {
