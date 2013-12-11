@@ -8,7 +8,12 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,6 +65,9 @@ public class KalmanAgent {
     private double mPrevTime;
 
     private KalmanPlot kalmanPlot;
+
+    /**The elapsed time of the trial*/
+    private double mElapsedTime = 0.0;
 
 
     private PDAngVelController controller = new PDAngVelController(.8, .2);
@@ -127,13 +135,38 @@ public class KalmanAgent {
     /**
      * Outputs the sigma values
      */
-    public void printSigmaValues() {
+    private ArrayList<Double> prevXPosSigma = new ArrayList<Double>();
+    private ArrayList<Double> prevYPosSigma = new ArrayList<Double>();
+    private ArrayList<Double> prevXVelSigma = new ArrayList<Double>();
+    private ArrayList<Double> prevYVelSigma = new ArrayList<Double>();
+    private ArrayList<Double> prevXAccelSigma = new ArrayList<Double>();
+    private ArrayList<Double> prevYAccelSigma = new ArrayList<Double>();;
+
+    /**
+     * The maximum difference between
+     * @param nums
+     */
+    private double percentMaxDiff(ArrayList<Double> nums) {
+        if(nums.size() == 0)
+            return 1.0;
+
+        Collections.sort(nums);
+        Double min = nums.get(0);
+        Double max = nums.get(nums.size() - 1);
+        return (1.0 - (min / max));
+    }
+
+    public void printSigmaValues() throws IOException {
         double xPosSigma = Math.sqrt(1.0 / mE_t.getEntry(0, 0));
         double xVelSigma = Math.sqrt(1.0 / mE_t.getEntry(1, 1));
         double xAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(2, 2));
         double yPosSigma = Math.sqrt(1.0 / mE_t.getEntry(3, 3));
         double yVelSigma = Math.sqrt(1.0 / mE_t.getEntry(4, 4));
         double yAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(5, 5));
+
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("x_position", true)));
+        out.println(mElapsedTime + ", " + xPosSigma);
+        out.close();
 
         System.out.println("x-position-sigma: " + xPosSigma);
         System.out.println("y-position-sigma: " + yPosSigma);
@@ -150,6 +183,7 @@ public class KalmanAgent {
         double timeDiffInSec = (newTime - mPrevTime) / 1000;
         mPrevTime = newTime;
 
+        mElapsedTime += timeDiffInSec;
         //System.out.println(timeDiffInSec);
 
         updateKalmanGainMatrix();
@@ -197,63 +231,5 @@ public class KalmanAgent {
      */
     public Vector getPos(RealMatrix stateVector) {
         return new Vector(stateVector.getEntry(0, 0), stateVector.getEntry(3,0));
-    }
-
-    /**
-     * Gets a point in front of the tank
-     */
-    public void leadAndShoot() throws IOException, InterruptedException {
-        double timeToPrepareStart = System.currentTimeMillis();
-
-        double waitTime = 7.0;
-
-        updatePhysics(waitTime);
-        RealMatrix meanPrediction = mF.multiply(mU_t);
-        System.out.println("Predicted: " + meanPrediction.toString());
-
-        MyTank myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
-
-        Vector targetPosition = new Vector(meanPrediction.getEntry(0, 0), meanPrediction.getEntry(3,0));
-        double deltaY = targetPosition.y() - myTank.getPos().y();
-        double deltaX = targetPosition.x() - myTank.getPos().x();
-        double targetAngle = Math.atan2(deltaY, deltaX);
-
-        // line up
-        double prevTime = mPrevTime;
-        while(true) {
-            double newTime = System.currentTimeMillis();
-            double timeDiffInSec = (newTime - prevTime) / 1000;
-            prevTime = newTime;
-
-            myTank = mServer.getMyTanks(Tank.TeamColor.BLUE).get(0);
-            double currAngVel = myTank.getAngVel();
-            double angAccel = controller.getAcceleration(targetAngle, myTank.getAngle(), timeDiffInSec);
-            mServer.angVel(0, currAngVel + angAccel);
-            if(Math.abs(angAccel) < 0.01 && Math.abs(myTank.getAngle() - targetAngle) < 0.01)
-                break;
-        }
-
-        // calculate bullet travel time
-        double distToTarget = Point2D.distance(targetPosition, myTank.getPos());
-        double bulletTravelTime = distToTarget / 100.0;
-
-        double timeToPrepare = (System.currentTimeMillis() - timeToPrepareStart) / 1000;
-
-        System.out.println("Bullet travel time: " + bulletTravelTime);
-        System.out.println("Time to prepare: " + timeToPrepare);
-
-        waitTime -= bulletTravelTime;
-        waitTime -= timeToPrepare;
-
-        //System.out.println(waitTime);
-        long waitTimeMilli = (long) (waitTime * 1000);
-        System.out.println("How long we should wait: " + waitTimeMilli);
-        System.out.println("Before wait: " + (System.currentTimeMillis() - timeToPrepareStart));
-        if(waitTimeMilli > 0)
-            Thread.sleep(waitTimeMilli);
-
-        mServer.shoot(0);
-        System.out.println("End: " + (System.currentTimeMillis() - timeToPrepareStart));
-        System.out.println("");
     }
 }
