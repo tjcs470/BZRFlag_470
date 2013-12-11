@@ -145,8 +145,9 @@ public class KalmanAgent {
     public void printSigmaValues() throws IOException {
         double xPosSigma = Math.sqrt(1.0 / mE_t.getEntry(0, 0));
         xPosSigmaSamples.recordSigma(xPosSigma);
-        if(xPosSigmaSamples.converged())
-            System.out.println("X converged");
+        if(xPosSigmaSamples.converged()) {
+            System.out.println("X converged in " + xPosSigmaSamples.getTotalRecorded());
+        }
 
         double xVelSigma = Math.sqrt(1.0 / mE_t.getEntry(1, 1));
         xVelSigmaSamples.recordSigma(xVelSigma);
