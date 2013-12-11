@@ -61,8 +61,6 @@ public class KalmanAgent {
 
     private KalmanPlot kalmanPlot;
 
-    private int obsvCounter;
-
 
     private PDAngVelController controller = new PDAngVelController(.8, .2);
 
@@ -73,7 +71,6 @@ public class KalmanAgent {
         mPrevTime = System.currentTimeMillis();
         kalmanPlot = new KalmanPlot();
         new GnuplotRadar(kalmanPlot);
-        obsvCounter = 0;
     }
 
 
@@ -127,6 +124,26 @@ public class KalmanAgent {
         mF.setEntry(4, 5, deltaT);
     }
 
+    /**
+     * Outputs the sigma values
+     */
+    public void printSigmaValues() {
+        double xPosSigma = Math.sqrt(1.0 / mE_t.getEntry(0, 0));
+        double xVelSigma = Math.sqrt(1.0 / mE_t.getEntry(1, 1));
+        double xAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(2, 2));
+        double yPosSigma = Math.sqrt(1.0 / mE_t.getEntry(3, 3));
+        double yVelSigma = Math.sqrt(1.0 / mE_t.getEntry(4, 4));
+        double yAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(5, 5));
+
+        System.out.println("x-position-sigma: " + xPosSigma);
+        System.out.println("y-position-sigma: " + yPosSigma);
+        System.out.println("x-velocity-sigma: " + xVelSigma);
+        System.out.println("y-velocity-sigma: " + yVelSigma);
+        System.out.println("x-acceleration-sigma: " + xAccelSigma);
+        System.out.println("y-acceleration-sigma: " + yAccelSigma);
+        System.out.println("");
+    }
+
     int nObvs = 0;
     public void tick() throws IOException, InterruptedException {
         double newTime = System.currentTimeMillis();
@@ -146,7 +163,8 @@ public class KalmanAgent {
         kalmanPlot.setYSigma(ySigma);
         kalmanPlot.setTargetPos(new Vector(mU_t.getEntry(0, 0), mU_t.getEntry(3, 0)));
 
-        System.out.println("Sigma_t: " + mE_t.toString());
+        //System.out.println("Sigma_t: " + mE_t.toString());
+        printSigmaValues();
 
         ///leadAndShoot();
 
