@@ -154,6 +154,7 @@ public class KalmanAgent {
         xPosSigmaSamples.recordSigma(xPosSigma);
         if(xPosSigmaSamples.converged() && !xPosConverged) {
             System.out.println("X position converged in " + xPosSigmaSamples.getTotalRecorded());
+            System.out.println(xPosSigma);
             xPosConverged = true;
         }
 
@@ -161,34 +162,39 @@ public class KalmanAgent {
         xVelSigmaSamples.recordSigma(xVelSigma);
         if(xVelSigmaSamples.converged() && !xVelConverged) {
             System.out.println("X velocity converged in " + xVelSigmaSamples.getTotalRecorded());
+            System.out.println(xVelSigma);
             xVelConverged = true;
         }
 
         double xAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(2, 2));
         xAccelSigmaSamples.recordSigma(xAccelSigma);
         if(xAccelSigmaSamples.converged() && !xAccelConverged) {
-            System.out.println("X velocity converged in " + xAccelSigmaSamples.getTotalRecorded());
+            System.out.println("X acceleration converged in " + xAccelSigmaSamples.getTotalRecorded());
+            System.out.println(xAccelSigma);
             xAccelConverged = true;
         }
 
         double yPosSigma = Math.sqrt(1.0 / mE_t.getEntry(3, 3));
         yPosSigmaSamples.recordSigma(yPosSigma);
-        if(yPosSigmaSamples.converged() && !xPosConverged) {
+        if(yPosSigmaSamples.converged() && !yPosConverged) {
             System.out.println("Y position converged in " + yPosSigmaSamples.getTotalRecorded());
+            System.out.println(yPosSigma);
             yPosConverged = true;
         }
 
         double yVelSigma = Math.sqrt(1.0 / mE_t.getEntry(4, 4));
         yVelSigmaSamples.recordSigma(yVelSigma);
         if(yVelSigmaSamples.converged() && !yVelConverged) {
-            System.out.println("X velocity converged in " + yVelSigmaSamples.getTotalRecorded());
+            System.out.println("Y velocity converged in " + yVelSigmaSamples.getTotalRecorded());
+            System.out.println(yVelSigma);
             yVelConverged = true;
         }
 
         double yAccelSigma = Math.sqrt(1.0 / mE_t.getEntry(5, 5));
         yAccelSigmaSamples.recordSigma(yAccelSigma);
         if(yAccelSigmaSamples.converged() && !yAccelConverged) {
-            System.out.println("X velocity converged in " + yAccelSigmaSamples.getTotalRecorded());
+            System.out.println("Y acceleration converged in " + yAccelSigmaSamples.getTotalRecorded());
+            System.out.println(yAccelSigma);
             yAccelConverged = true;
         }
 
