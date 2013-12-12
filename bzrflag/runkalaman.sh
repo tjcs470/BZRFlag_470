@@ -1,0 +1,1 @@
+./bin/bzrflag --red-tanks=1 --blue-tanks=1 --purple-tanks=1 --green-tanks=1 --world="maps/empty.bzw" --blue-posnoise=0 --green-posnoise=5 --red-posnoise=5  --purple-posnoise=5 --blue-port=47791 --green-port=56751 --purple-port=58276 --red-port=48081 --explode-time=20
